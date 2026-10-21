@@ -470,6 +470,19 @@ fm_backend_rex_label_in_use() { # <label>
 # and echo "<session-uuid> <window-uuid> <block-uuid>". Refuses a scoped name
 # already live anywhere on the server.
 fm_backend_rex_create_task() { # <label> <cwd>
+  local name rc
+  name=$(fm_backend_rex_scoped_name "$1")
+  fm_backend_rex_session_lock || {
+    echo "error: could not take the Rex session lock; refusing to create '$name'" >&2
+    return 1
+  }
+  fm_backend_rex_create_task_locked "$@"
+  rc=$?
+  fm_backend_rex_session_unlock
+  return "$rc"
+}
+
+fm_backend_rex_create_task_locked() { # <label> <cwd>
   local label=$1 cwd=$2 name tab sid out wid bid rc
   name=$(fm_backend_rex_scoped_name "$label")
   fm_backend_rex_label_in_use "$name"
@@ -486,17 +499,11 @@ fm_backend_rex_create_task() { # <label> <cwd>
       ;;
   esac
   tab="${cwd##*/}·${label#fm-}"
-  fm_backend_rex_session_lock || {
-    echo "error: could not take the Rex session lock; refusing to create '$name'" >&2
-    return 1
-  }
   if ! sid=$(fm_backend_rex_home_session_ensure_locked "$cwd") ||
     ! out=$(fm_backend_rex_cli_json window new -s "$sid" "$tab" -c "$cwd" --focus=false --keep-open --json); then
-    fm_backend_rex_session_unlock
     [ -z "${sid:-}" ] || echo "error: rex window new failed for '$name'" >&2
     return 1
   fi
-  fm_backend_rex_session_unlock
   wid=$(printf '%s' "$out" | jq -r '.window_id // empty' 2>/dev/null)
   bid=$(printf '%s' "$out" | jq -r '.block_ids[0] // empty' 2>/dev/null)
   if [ -z "$wid" ] || [ -z "$bid" ]; then
