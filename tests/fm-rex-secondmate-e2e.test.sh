@@ -91,6 +91,22 @@ wait_for_prompt() { # <needle>
   return 1
 }
 
+wait_for_settled() {
+  local screen last='' stable=0 _
+  for _ in $(seq 1 240); do
+    screen=$(fm_backend_rex_capture "$TARGET" 40 "fm-$ID" 2>/dev/null || true)
+    if [[ "$screen" == *'operation was aborted'* ]] && [ "$screen" = "$last" ]; then
+      stable=$((stable + 1))
+      [ "$stable" -ge 4 ] && return 0
+    else
+      stable=0
+    fi
+    last=$screen
+    sleep 0.25
+  done
+  return 1
+}
+
 # All adapter reads below run as the sender home, like the parent firstmate.
 export FM_HOME="$SENDER_HOME" STATE="$SENDER_HOME/state"
 fm_backend_source rex || e2e_fail "could not source the rex adapter"
@@ -109,7 +125,10 @@ fm_backend_rex_target_ready "$TARGET" "fm-$ID" || e2e_fail "the secondmate block
 pass "real Pi/Rex: --secondmate opens the first tab of its own fm-<id> session, labeled for the parent home"
 
 wait_for_prompt 'Isolated Rex secondmate' || e2e_fail "the secondmate never received its charter"
-sleep 2
+# Rex has no native idle signal, so wait until Pi has rendered the charter
+# turn's abort and its screen stays unchanged: a doorbell typed while that
+# aborting turn is still in flight is queued and dropped with it.
+wait_for_settled || e2e_fail "the secondmate never settled after its charter abort"
 SEND_OUT=$(PATH="$FAKEBIN:$PATH" FM_GATE_REFUSE_BYPASS=1 "$ROOT/bin/fm-send.sh" "$ID" "$REQUEST" 2>&1) \
   || e2e_fail "fm-send to the rex secondmate failed: $SEND_OUT"
 # fm-send stores the request as a durable inbox record and rings the agent with
