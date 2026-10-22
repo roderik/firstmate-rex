@@ -533,7 +533,37 @@ test_kill_closes_only_the_tasks_side_panes() {
   inspect_json "$s1" "$SID" side
   fm_backend_kill rex "$T" "" "" || fail "kill without a label should succeed"
   calls | grep -q " block close" && fail "without the task label no side pane may be closed"
-  pass "rex: kill closes only the task's labeled side panes in its tab, after its own block, and also when the worker is already gone"
+
+  new_case kill-side-moved
+  label=$(fm_backend_rex_scoped_name fm-t1)
+  inspect_json "$BID" "$SID" "$label" "$other_wid"
+  for b in "$s1" "$s2" "$f2"; do inspect_json "$b" "$SID" side; done
+  : >"$FAKE/close-removes"
+  printf 'window=%s\nrex_server=%s\nrex_window_id=%s\n' "$T" "$SERVER" "$WID" >"$STATE/t1.meta"
+  printf '{"blocks":[{"block_id":"block:%s","label":"%s","window_id":"window:%s"},{"block_id":"block:%s","label":"%s/tests","window_id":"window:%s"},{"block_id":"block:%s","label":"%s/dev","window_id":"window:%s"},{"block_id":"block:%s","label":"%s/old","window_id":"window:%s"}]}' \
+    "$BID" "$label" "$other_wid" "$s1" "$label" "$WID" "$s2" "$label" "$other_wid" "$f2" "$label" "$f3" \
+    >"$FAKE/blocks/session_$SID.json"
+  printf '{"session_id":"session:%s","label":"fm-local","windows":[]}' "$SID" >"$FAKE/session/session_$SID.json"
+  fm_backend_kill rex "$T" "" fm-t1 || fail "kill of a moved worker should succeed"
+  calls | grep -q " block close -s session:$SID block:$s1" || fail "a side pane left in the worker's recorded tab must be closed after the worker moved"
+  calls | grep -q " block close -s session:$SID block:$s2" || fail "a side pane in the worker's current tab must be closed"
+  calls | grep -q " block close -s session:$SID block:$f2" && fail "a side pane in neither the current nor the recorded tab must never be closed"
+
+  new_case kill-side-stuck
+  label=$(fm_backend_rex_scoped_name fm-t1)
+  inspect_json "$s1" "$SID" side
+  printf 'window=%s\nrex_server=%s\nrex_window_id=%s\n' "$T" "$SERVER" "$WID" >"$STATE/t1.meta"
+  printf '{"blocks":[{"block_id":"block:%s","label":"%s/tests","window_id":"window:%s"}]}' "$s1" "$label" "$WID" >"$FAKE/blocks/session_$SID.json"
+  out=$(fm_backend_kill rex "$T" "" fm-t1 2>&1) && fail "a side pane still present after close must fail the kill"
+  assert_contains "$out" "still present" "the stuck side-pane refusal should say so"
+
+  new_case kill-side-unreadable
+  printf 'window=%s\nrex_server=%s\nrex_window_id=%s\n' "$T" "$SERVER" "$WID" >"$STATE/t1.meta"
+  printf '1' >"$FAKE/blocks/session_$SID.exit"
+  : >"$FAKE/blocks/session_$SID.json"
+  out=$(fm_backend_kill rex "$T" "" fm-t1 2>&1) && fail "an unreadable pane inventory must fail the kill"
+  assert_contains "$out" "could not list" "the unreadable-inventory refusal should say so"
+  pass "rex: kill closes only the task's labeled side panes in its current and recorded tabs, after its own block, also when the worker is already gone, and fails when one may remain"
 }
 
 test_side_pane_helper() {

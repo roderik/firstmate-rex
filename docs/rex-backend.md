@@ -86,7 +86,8 @@ The live worktree path comes from the block's foreground process cwd, so spawn-t
 `fm_backend_agent_state` reads the block's foreground process, plus the terminal's foreground process group, through the same agent-process classifier tmux and herdr use: a recognized harness process is alive, a bare shell or a recorded exit is dead, anything else is ambiguous, and a closed block is missing.
 
 Cleanup closes only the task's block and then requires exit 3 on that block id before reporting success; an already-gone block stays quiet.
-It then closes the task's [side panes](#side-panes) in the task's tab, or in the recorded tab when the block was already gone, and leaves every other pane alone.
+It then closes the task's [side panes](#side-panes) in the task's current and recorded tabs (only the recorded one when the block was already gone), and leaves every other pane alone.
+An unreadable pane list or a side pane still present after close fails the cleanup, so the task's record stays and cleanup can be retried.
 When the closed tab was the last one in the home's own `fm-local` or `fm-<id>` session, cleanup closes that session too, unless it is Firstmate's own session or still holds a detached block.
 Spawning and that cleanup share one home-wide lock (`state/.rex-session.lock`), so a new task's tab can never land in a session between its empty check and its close.
 
@@ -104,7 +105,7 @@ bin/fm-rex-side.sh close dev
 - A side pane opens without taking focus and stays open after its command exits, so its last output stays readable; `--wait` returns the command's exit status.
 - Its label is `<worker block label>/<name>`, for example `fm-firstmate-42de5bad-t1/tests`, because Rex records no creating client on a block.
 - The helper acts only from a proven worker pane, with the same structural proof as detection, and refuses with nothing changed anywhere else.
-- Cleanup closes exactly the task's labeled side panes in its tab, so no orphan tab is left; a foreign pane in that tab is never closed.
+- Cleanup closes exactly the task's labeled side panes in its current and recorded tabs, so no orphan tab is left even after the worker's pane moved; a foreign pane in those tabs is never closed, and a side pane that does not close fails the cleanup.
 - The command runs with the login shell's environment, not the caller's.
 
 Every ship and scout brief tells the worker about the helper, except a `--rex-lab` brief, whose contract keeps the worker off the live server.

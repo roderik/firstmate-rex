@@ -14,7 +14,8 @@
 # `fm-firstmate-42de5bad-t1/tests`. That label is the only link between a
 # side pane and its worker, because Rex records no creating client on a block;
 # task cleanup (bin/backends/rex.sh fm_backend_rex_kill) closes exactly the
-# blocks carrying it in the task's tab and leaves every other pane alone.
+# blocks carrying it in the task's current and recorded tabs and leaves every
+# other pane alone.
 #
 # The helper acts only for a proven worker pane: REX_BLOCK must be live on the
 # selected server, inside REX_SESSION, with that block's child process an

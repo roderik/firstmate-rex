@@ -851,18 +851,22 @@ fm_backend_rex_endpoint_absence_recheck() { # <target>
 
 # fm_backend_rex_kill: close the task's block, then prove it gone (exit 3),
 # close its side panes, and retire this home's own session if that was its
-# last tab. 0 = closed or already gone; 1 = the block may still be live
-# (unreachable server, a label that no longer matches, or a close that did not
-# take). The deliberate close pre-commits the block's `dead` edge, so an armed
-# watcher never escalates it.
+# last tab. 0 = closed or already gone; 1 = the block or a side pane may still
+# be live (unreachable server, a label that no longer matches, or a close that
+# did not take), so teardown keeps the record and can retry. The deliberate
+# close pre-commits the block's `dead` edge, so an armed watcher never
+# escalates it.
 fm_backend_rex_kill() { # <target> [unused] [expected-label]
-  local target=$1 expected_label=${3:-} dead_marker sid view window label
+  local target=$1 expected_label=${3:-} dead_marker sid view window recorded="" label
+  if window=$(fm_backend_rex_record_field "$target" rex_window_id); then
+    recorded=window:$window
+  fi
   if ! fm_backend_rex_target_ready "$target" "$expected_label"; then
     case "$FM_BACKEND_REX_READY_RC" in
       3)
         sid=$FM_BACKEND_REX_SESSION_ID
-        if [ -n "$expected_label" ] && window=$(fm_backend_rex_record_field "$target" rex_window_id); then
-          fm_backend_rex_close_side_panes "$target" "window:$window" "$(fm_backend_rex_scoped_name "$expected_label")"
+        if [ -n "$expected_label" ]; then
+          fm_backend_rex_close_side_panes "$target" "$(fm_backend_rex_scoped_name "$expected_label")" "$recorded" || return 1
         fi
         fm_backend_rex_retire_home_session "$sid" "$target" "$expected_label"
         return 0
@@ -890,34 +894,46 @@ fm_backend_rex_kill() { # <target> [unused] [expected-label]
     echo "error: the Rex block for $target is still present after close" >&2
     return 1
   fi
-  fm_backend_rex_close_side_panes "$target" "$window" "$label"
+  fm_backend_rex_close_side_panes "$target" "$label" "$window" "$recorded" || return 1
   fm_backend_rex_retire_home_session "$sid" "$target" "$expected_label"
   return 0
 }
 
 # fm_backend_rex_close_side_panes: close the side panes bin/fm-rex-side.sh
-# opened for the task - blocks labeled `<scoped-label>/<name>` - in typed
-# window <window> of the task's session, on the task's server, proving each
-# gone. Every other pane, in that tab or elsewhere, is untouched. A side pane
-# is not the worker, so an unreadable inventory or a close that does not take
-# only warns.
-fm_backend_rex_close_side_panes() { # <target> <typed-window-id> <scoped-label>
-  local target=$1 window=$2 label=$3 server sid out bid
-  case "$window:$label" in window:?*:fm-?*) ;; *) return 0 ;; esac
+# opened for the task - blocks labeled `<scoped-label>/<name>` - in any of the
+# typed windows given (the worker's current tab and its recorded one, since a
+# moved block keeps its id but not its tab) of the task's session, on the
+# task's server, proving each gone. Every other pane, in those tabs or
+# elsewhere, is untouched. 1 when the inventory is unreadable or a close did
+# not take, so a side pane is never left behind silently.
+fm_backend_rex_close_side_panes() { # <target> <scoped-label> <typed-window-id>...
+  local target=$1 label=$2 server sid out bid rc=0 windows w
+  shift 2
+  case "$label" in fm-?*) ;; *) return 0 ;; esac
   case "$label" in */*) return 0 ;; esac
+  windows=$(for w in "$@"; do
+    case "$w" in (window:?*) printf '%s\n' "$w" ;; esac
+  done | jq -Rsc 'split("\n") | map(select(. != "")) | unique')
+  [ "$windows" != "[]" ] || return 0
   fm_backend_rex_parse_target "$target" || return 0
   sid=$FM_BACKEND_REX_SESSION_ID
-  server=$(fm_backend_rex_server "$target") || return 0
-  out=$(FM_BACKEND_REX_SERVER=$server fm_backend_rex_cli block ls -s "$sid" --json 2>/dev/null) || {
-    echo "warning: could not list the Rex panes of $target; its side panes may remain" >&2
-    return 0
+  server=$(fm_backend_rex_server "$target") || {
+    echo "error: the Rex server of $target is unknown; its side panes may remain" >&2
+    return 1
   }
-  for bid in $(printf '%s' "$out" | jq -r --arg w "$window" --arg p "$label/" \
-    '.blocks[]? | select(.window_id == $w and ((.label // "") | startswith($p))) | .block_id' 2>/dev/null); do
-    FM_BACKEND_REX_SERVER=$server fm_backend_rex_block_close "${sid#session:}:${bid#block:}" ||
-      echo "warning: the Rex side pane $bid of $target is still present after close" >&2
+  if ! out=$(FM_BACKEND_REX_SERVER=$server fm_backend_rex_cli block ls -s "$sid" --json 2>/dev/null) ||
+    ! printf '%s' "$out" | jq -e '(.blocks | type) == "array"' >/dev/null 2>&1; then
+    echo "error: could not list the Rex panes of $target; its side panes may remain" >&2
+    return 1
+  fi
+  for bid in $(printf '%s' "$out" | jq -r --argjson w "$windows" --arg p "$label/" \
+    '.blocks[] | select((.window_id as $id | any($w[]; . == $id)) and ((.label // "") | startswith($p))) | .block_id' 2>/dev/null); do
+    FM_BACKEND_REX_SERVER=$server fm_backend_rex_block_close "${sid#session:}:${bid#block:}" || {
+      echo "error: the Rex side pane $bid of $target is still present after close" >&2
+      rc=1
+    }
   done
-  return 0
+  return "$rc"
 }
 
 # fm_backend_rex_retire_home_session: after a task tab closes, kill the
