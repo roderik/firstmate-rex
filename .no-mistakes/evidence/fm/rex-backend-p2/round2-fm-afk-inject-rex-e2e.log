@@ -1,0 +1,5 @@
+ok - rex afk: discovery proves the Rex pane it runs in, and the same REX_* without ancestry falls back
+ok - rex afk: the daemon runs in a recorded detached block of the captain's session and closes by exact id
+ok - rex afk: an escalation is typed once and submitted into the Rex supervisor pane
+ok - rex afk: the composer gate defers an inject over pending captain input
+afk rc=0

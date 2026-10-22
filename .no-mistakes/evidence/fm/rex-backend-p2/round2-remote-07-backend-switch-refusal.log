@@ -1,0 +1,12 @@
+$ fm-spawn.sh nmrex2 --secondmate --backend herdr --harness claude   # switch a live Rex secondmate
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.OLGxMS
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+warning: remote secondmate nmrex2 sync skipped before launch: primary default-branch commit cannot be resolved
+/Users/roderik/code/firstmate-rex/bin/fm-remote-job-worker.sh: child setpgid (91715 to 91715): Operation not permitted
+error: remote secondmate nmrex2 endpoint is recorded on backend 'rex', not the requested 'herdr'; retire it before moving it to another backend
+rc=1
+--- parent record unchanged
+remote_host=ds9
+remote_root=/Users/roderik/code/firstmate-rex
+remote_backend=rex
+remote_target=01a1626f-9f6d-7bd7-8941-63fecac698e5:01a16272-b2bb-7376-8124-e695c9eee607

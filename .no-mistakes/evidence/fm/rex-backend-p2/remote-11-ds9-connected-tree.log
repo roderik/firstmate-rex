@@ -1,0 +1,26 @@
+$ (ds9) rex client ls
+LABEL    CLIENT                 KIND  PRINCIPAL                                                        AGE     ID
+                                -     uid 501 over unix                                                2h ago  fa4c5c
+ds9      Rex Beta 0.1.0 (1347)  app   uid 501 over unix                                                2h ago  8b55c0
+voyager  Rex Beta 0.1.0 (1327)  app   roderik@vanderveer.be over tailscale via tailscale from voyager  2h ago  fb6f4b
+$ (ds9) rex ls
+LABEL     ID
+fm-nmrex  b2e2d8
+$ (ds9) rex session inspect fm-nmrex
+{"label":"fm-nmrex","windows":[{"window_id":"window:01a16264-afd2-7df2-9f9b-1b44d0a58dc0","label":"2ndmate·nmrex"}]}
+$ (ds9) rex capture of the second mate block (tail)
+    decisions waiting.
+  - Messages: There are no instructions from the main first mate waiting for me.
+  - Network checks: The startup network checks were still running when the
+    session opened. I'm treating them as unconfirmed until they finish. Any
+    failure will reach me as a notification.
+
+  I've sent nothing to the main first mate's reply channel, because my charter
+  only allows that for a real outcome, decision or blocker.
+
+✻ Cooked for 15s · done 8:56 AM
+                                      ✘ Auto-update failed · Run claude doctor
+────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ bypass permissions on (shift+tab to cycle)

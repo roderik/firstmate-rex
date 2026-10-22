@@ -1,0 +1,24 @@
+Note: switching to '509b6b12098e131023916f25802da660d3723c29'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+warning: secondmate rex-sm sync skipped before launch: primary default-branch commit cannot be resolved
+ok - real Pi/Rex: --secondmate opens the first tab of its own fm-<id> session, labeled for the parent home
+ok - real Pi/Rex: an exact-id fm-send stores the request and rings the secondmate with its inbox doorbell
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+warning: secondmate rex-sm sync skipped before launch: primary default-branch commit cannot be resolved
+ok - real Pi/Rex: a destroyed secondmate endpoint is proven gone and respawns into its recorded session
+ok - real Pi/Rex: closing the secondmate retires its emptied session

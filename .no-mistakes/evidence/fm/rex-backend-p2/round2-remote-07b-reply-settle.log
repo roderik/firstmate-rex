@@ -1,0 +1,7 @@
+$ fm-procevent.sh ensure-listening remote-reply-nmrex2  # pulls the host relay log
+rc=0
+--- parent pending-reply record
+(eval):1: no matches found: /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.OLGxMS/state/pending-replies/nmrex2/*
+8d2c65640f12903e
+--- parent state/nmrex2.status
+done [at=1792652907]: corr=8d2c65640f12903e PONG-REX2

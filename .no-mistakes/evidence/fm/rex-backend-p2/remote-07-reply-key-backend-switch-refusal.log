@@ -1,0 +1,22 @@
+$ fm-procevent.sh ensure-listening remote-reply-nmrex  # pulls the host relay log
+--- parent pending-reply record
+corr_id=65c723621d7ae152
+phase=resolved
+resolved_epoch=1792651923
+resolved_via=helper
+--- parent state/nmrex.status
+done [corr=65c723621d7ae152] [at=1792651706]: PONG-REX (via-helper)
+
+$ fm-send.sh nmrex --key C-l
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.KOucRV
+rc=0
+$ fm-spawn.sh nmrex --secondmate --backend herdr   # adversarial: switch backend while the Rex endpoint is live
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+warning: remote secondmate nmrex sync skipped before launch: primary default-branch commit cannot be resolved
+error: remote secondmate nmrex endpoint is recorded on backend 'rex', not the requested 'herdr'; retire it before moving it to another backend
+rc=0
+--- parent record still rex
+remote_host=ds9
+remote_root=/Users/roderik/code/firstmate-rex
+remote_backend=rex
+remote_target=01a1625d-13ca-72d2-84c1-e5bb23b2e2d8:01a1625d-13ca-73c0-a059-b1897dc4c104

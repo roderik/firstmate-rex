@@ -1,0 +1,4 @@
+$ fm-remote-home-seed.sh --backend rex nmrex2 ds9 <root> /private/tmp/fm-gate-nmrex2-80138 --no-projects
+provisioned: /private/tmp/fm-gate-nmrex2-80138 projects=0
+home=ds9:/private/tmp/fm-gate-nmrex2-80138
+rc=0

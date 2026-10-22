@@ -1,0 +1,15 @@
+$ fm-spawn.sh nmrex --secondmate --harness claude   # recovery, no --backend
+warning: remote secondmate nmrex sync skipped before launch: primary default-branch commit cannot be resolved
+spawned nmrex harness=claude kind=secondmate mode=secondmate yolo=off window=remote:nmrex worktree=/private/tmp/fm-gate-nmrex-13832 remote=ds9 backend=rex
+--- parent record
+remote_host=ds9
+remote_root=/Users/roderik/code/firstmate-rex
+remote_backend=rex
+remote_target=01a1625d-13ca-72d2-84c1-e5bb23b2e2d8:01a16264-afb7-7700-bded-493f9ca50e18
+--- ds9 Rex server
+LABEL     ID
+fm-nmrex  b2e2d8
+$ fm_secondmate_liveness_probe ... full
+status=alive state=alive cause= where= line=remote secondmate nmrex already live (host=ds9) reason=
+{"label":"fm-nmrex","windows":[{"window_id":"window:01a16264-afd2-7df2-9f9b-1b44d0a58dc0","label":"2ndmate·nmrex"}]}
+{"session_id":"session:01a1625d-13ca-72d2-84c1-e5bb23b2e2d8","label":"fm-firstmate-42de5bad-nmrex","placement":"placed","window_id":"window:01a16264-afd2-7df2-9f9b-1b44d0a58dc0"}

@@ -1,0 +1,13 @@
+$ fm-spawn.sh nmrex2 --secondmate --backend rex --harness claude
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.OLGxMS
+warning: remote secondmate nmrex2 sync skipped before launch: primary default-branch commit cannot be resolved
+spawned nmrex2 harness=claude kind=secondmate mode=secondmate yolo=off window=remote:nmrex2 worktree=/private/tmp/fm-gate-nmrex2-80138 remote=ds9 backend=rex
+rc=0
+--- parent record (state/nmrex2.meta, remote keys)
+window=remote:nmrex2
+remote_host=ds9
+remote_root=/Users/roderik/code/firstmate-rex
+remote_backend=rex
+remote_target=01a1626f-9f6d-7bd7-8941-63fecac698e5:01a1626f-9f6d-7c7f-aba0-f3f014d44524
+--- count of remote_rex_session/remote_herdr_session keys in parent record
+0

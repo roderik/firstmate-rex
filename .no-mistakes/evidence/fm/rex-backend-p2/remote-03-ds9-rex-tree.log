@@ -1,0 +1,22 @@
+{
+  "endpoint": "unix:///Users/roderik/Library/Application%20Support/rex/server.sock",
+  "instance_id": "af715ffe-5850-4822-93d0-c7d2ddb2ce37",
+  "api_revision": 5,
+  "session_count": 1
+}
+LABEL     ID
+fm-nmrex  b2e2d8
+{
+  "label": "fm-nmrex",
+  "windows": [
+    {
+      "window_id": "window:01a1625d-13e1-7927-bbfa-7e61d6d203ec",
+      "label": "2ndmate·nmrex"
+    }
+  ]
+}
+{
+  "label": null,
+  "session_id": "session:01a1625d-13ca-72d2-84c1-e5bb23b2e2d8",
+  "last_exit": null
+}

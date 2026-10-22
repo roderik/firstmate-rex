@@ -1,0 +1,12 @@
+$ fm-teardown.sh nmrex
+teardown nmrex complete (remote ds9:/private/tmp/fm-gate-nmrex-13832)
+--- parent state
+pending-replies
+procevent
+procevent-inbox
+remote-replies
+home-summary.json
+--- ds9 after retire
+{"instance_id":"af715ffe-5850-4822-93d0-c7d2ddb2ce37","session_count":0}
+LABEL  ID
+ls: /private/tmp/fm-gate-nmrex-13832: No such file or directory

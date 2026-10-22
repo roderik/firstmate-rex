@@ -1,0 +1,21 @@
+mode=check
+path=/Users/roderik/code/firstmate-rex/bin:/Users/roderik/.local/bin:/nix/store/zn9cb7r9zz0l85qcnxmnhap1051rrdxs-devenv-wrapped-2.3.1/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+entrypoint=yes
+platform=darwin
+required git=/opt/homebrew/bin/git
+required jq=/opt/homebrew/bin/jq
+required rex=/Users/roderik/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex
+required tasks-axi=/opt/homebrew/bin/tasks-axi
+required treehouse=/Users/roderik/.local/bin/treehouse
+required harness=claude:/Users/roderik/.local/bin/claude
+optional tmux=/opt/homebrew/bin/tmux
+optional no-mistakes=/Users/roderik/.local/bin/no-mistakes
+optional gh=/opt/homebrew/bin/gh
+check rex=ok: /Users/roderik/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex
+check gui-session=ok: gui/501
+check remote-job-worker=ok: /Users/roderik/Library/LaunchAgents/dev.firstmate.remote-job.plist matches the Firstmate-owned Aqua worker contract
+check remote-job-worker-loaded=ok: dev.firstmate.remote-job is loaded in gui/501
+check remote-job-probe=ok: the remote job worker completed the required-tool probe
+check rex-server=ok: unix:///Users/roderik/Library/Application%20Support/rex/server.sock
+check entrypoint-link=ok: /Users/roderik/.local/bin/fm-remote-entrypoint.sh
+ok: remote second-mate readiness confirmed on this host

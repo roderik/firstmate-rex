@@ -1,0 +1,21 @@
+$ (ds9) rex client ls
+LABEL    CLIENT                 KIND  PRINCIPAL                                                        AGE     ID
+                                -     uid 501 over unix                                                2h ago  fa4c5c
+ds9      Rex Beta 0.1.0 (1347)  app   uid 501 over unix                                                2h ago  8b55c0
+voyager  Rex Beta 0.1.0 (1327)  app   roderik@vanderveer.be over tailscale via tailscale from voyager  2h ago  fb6f4b
+$ (ds9) rex ls
+LABEL      ID
+fm-nmrex2  c698e5
+$ (ds9) rex session inspect fm-nmrex2
+session: session:01a1626f-9f6d-7bd7-8941-63fecac698e5
+label: fm-nmrex2
+active-window: window:01a1626f-9f89-7bdb-b4d3-6f579c4b50f0
+windows: 1
+clients:
+  uid 501 over unix                                                31s ago  client:01a161d6-fbda-749b-80f6-db7b508b55c0
+  roderik@vanderveer.be over tailscale via tailscale from voyager  31s ago  client:01a161d8-d72a-74be-af2b-d29868fb6f4b
+  uid 501 over unix                                                0s ago   client:01a16270-19c0-7a9a-a395-cba8e4962cb0
+
+WINDOW                                       LABEL           ACTIVE  FOCUSED BLOCK                               BLOCKS
+window:01a1626f-9f89-7bdb-b4d3-6f579c4b50f0  2ndmate·nmrex2  true    block:01a1626f-9f6d-7c7f-aba0-f3f014d44524  1
+

@@ -1,0 +1,43 @@
+$ fm-teardown.sh nmrex2
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.OLGxMS
+REFUSED: secondmate nmrex2 still has an unresolved routed reply
+rc=1
+--- parent state
+pending-replies
+procevent
+home-summary.json
+nmrex2.meta
+--- ds9 after retire
+LABEL      ID
+fm-nmrex2  c698e5
+AGENTS.md
+CLAUDE.md
+CONTRIBUTING.md
+GROK_BOT.md
+LICENSE
+README.md
+VISION.md
+assets
+bin
+config
+data
+docs
+projects
+skills
+state
+tests
+(first attempt refused: 'secondmate nmrex2 still has an unresolved routed reply' before the reply relay was pulled; pending reply now phase=resolved)
+$ fm-teardown.sh nmrex2
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.OLGxMS
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+teardown nmrex2 complete (remote ds9:/private/tmp/fm-gate-nmrex2-80138)
+rc=0
+--- parent state
+pending-replies
+procevent
+procevent-inbox
+remote-replies
+home-summary.json
+--- ds9 after retire
+LABEL  ID
+ls: /private/tmp/fm-gate-nmrex2-80138: No such file or directory

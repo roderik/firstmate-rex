@@ -1,0 +1,27 @@
+$ fm_secondmate_liveness_probe <lab>/state/nmrex2.meta nmrex2 full   # live
+status=alive state=alive cause= where= line=remote secondmate nmrex2 already live (host=ds9)
+$ (on ds9) rex block close -s session:<fm-nmrex2> block:<secondmate block>
+rc=0
+LABEL      ID
+fm-nmrex2  c698e5
+$ fm_secondmate_liveness_probe ... full   # after close
+status=relaunchable state=missing cause=remote endpoint missing on its configured host where=host=ds9 line=
+$ fm-spawn.sh nmrex2 --secondmate --harness claude   # recovery, no --backend
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.OLGxMS
+WARNING: watcher still down (same stale episode; last beat: never, grace 300s) - full banner already printed this episode.
+warning: remote secondmate nmrex2 sync skipped before launch: primary default-branch commit cannot be resolved
+spawned nmrex2 harness=claude kind=secondmate mode=secondmate yolo=off window=remote:nmrex2 worktree=/private/tmp/fm-gate-nmrex2-80138 remote=ds9 backend=rex
+rc=0
+--- parent record
+remote_host=ds9
+remote_root=/Users/roderik/code/firstmate-rex
+remote_backend=rex
+remote_target=01a1626f-9f6d-7bd7-8941-63fecac698e5:01a16272-b2bb-7376-8124-e695c9eee607
+--- ds9 Rex server
+LABEL      ID
+fm-nmrex2  c698e5
+
+WINDOW                                       LABEL           ACTIVE  FOCUSED BLOCK                               BLOCKS
+window:01a16272-b2d5-7616-bafa-b18855a4e4c5  2ndmate·nmrex2  true    block:01a16272-b2bb-7376-8124-e695c9eee607  1
+$ fm_secondmate_liveness_probe ... full   # after recovery
+status=alive state=alive cause= where= line=remote secondmate nmrex2 already live (host=ds9)

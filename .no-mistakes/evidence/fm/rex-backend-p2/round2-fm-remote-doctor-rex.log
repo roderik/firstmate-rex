@@ -1,0 +1,5 @@
+ok - doctor --backend rex accepts a rex CLI on PATH and a server at API revision 5, with no Herdr checks
+ok - doctor --backend rex finds the rex CLI inside the app bundle when PATH lacks it
+ok - doctor --backend rex leaves an old, missing, or unreachable Rex to a human, even under --fix
+ok - doctor refuses a backend other than herdr or rex
+rc=0

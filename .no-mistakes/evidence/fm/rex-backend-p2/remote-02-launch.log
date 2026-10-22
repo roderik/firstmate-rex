@@ -1,0 +1,3 @@
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.KOucRV
+warning: remote secondmate nmrex sync skipped before launch: primary default-branch commit cannot be resolved
+spawned nmrex harness=claude kind=secondmate mode=secondmate yolo=off window=remote:nmrex worktree=/private/tmp/fm-gate-nmrex-13832 remote=ds9 backend=rex

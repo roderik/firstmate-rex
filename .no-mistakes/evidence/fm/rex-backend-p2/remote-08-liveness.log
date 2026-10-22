@@ -1,0 +1,9 @@
+$ fm_secondmate_liveness_probe <lab>/state/nmrex.meta nmrex full   # live
+status=alive state=alive cause= where= line=remote secondmate nmrex already live (host=ds9) reason=
+$ (on ds9) rex block close -s session:<fm-nmrex> block:<secondmate block>
+rc=0
+inspect-closed-block rc=3
+LABEL     ID
+fm-nmrex  b2e2d8
+$ fm_secondmate_liveness_probe ... full   # after close
+status=relaunchable state=missing cause=remote endpoint missing on its configured host where=host=ds9 line= reason=

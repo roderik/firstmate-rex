@@ -1,0 +1,38 @@
+--- ds9 steering inbox (/private/tmp/fm-gate-nmrex2-80138/state/parent-route/)
+home-summary.json
+nmrex2.busy-gen
+nmrex2.busy-state
+nmrex2.claude-settings.json
+nmrex2.git-hooks
+nmrex2.inbox
+nmrex2.meta
+
+/private/tmp/fm-gate-nmrex2-80138/state/parent-route//nmrex2.git-hooks:
+applypatch-msg
+commit-msg
+post-applypatch
+post-checkout
+post-commit
+post-merge
+post-rewrite
+pre-applypatch
+pre-auto-gc
+pre-commit
+pre-merge-commit
+--- parent-replies.status
+done [at=1792652907]: corr=8d2c65640f12903e PONG-REX2
+$ fm-on.sh nmrex2 fm-remote-secondmate-control.sh capture nmrex2 (tail)
+✻ Brewed for 31s · done 9:07 AM
+❯ : Firstmate instruction waiting: list "$FM_TASK_INBOX"/*.msg in your
+  'nmrex2.inbox' steering inbox, read and act on each in numeric order, then mv
+  each into its handled/.
+  Ran 2 shell commands
+⏺ Captain, the main firstmate sent a gate check asking for the word PONG-REX2. I
+  sent PONG-REX2 back with its reference number on the reply channel to the
+  main firstmate, and filed the message as handled. My inbox is empty and I'm
+  idle again.
+✻ Churned for 11s · done 9:08 AM
+────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ bypass permissions on (shift+tab to cycle)

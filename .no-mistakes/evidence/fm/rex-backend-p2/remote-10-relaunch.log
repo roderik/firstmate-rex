@@ -1,0 +1,17 @@
+$ fm-remote-secondmate-relaunch.sh nmrex claude default default
+relaunched nmrex harness=claude from=claude model=default effort=default backend=rex endpoint=01a1625d-13ca-72d2-84c1-e5bb23b2e2d8:01a16264-afb7-7700-bded-493f9ca50e18 worktree=/private/tmp/fm-gate-nmrex-13832
+schema=fm-remote-secondmate-control.v1
+backend=rex
+target=01a1625d-13ca-72d2-84c1-e5bb23b2e2d8:01a16264-afb7-7700-bded-493f9ca50e18
+rex_session=fm-nmrex
+harness=claude
+model=default
+effort=default
+rc=
+--- parent record
+remote_host=ds9
+remote_root=/Users/roderik/code/firstmate-rex
+remote_backend=rex
+remote_target=01a1625d-13ca-72d2-84c1-e5bb23b2e2d8:01a16264-afb7-7700-bded-493f9ca50e18
+$ fm_secondmate_liveness_probe ... full
+status=alive state=alive cause= where= line=remote secondmate nmrex already live (host=ds9) reason=
