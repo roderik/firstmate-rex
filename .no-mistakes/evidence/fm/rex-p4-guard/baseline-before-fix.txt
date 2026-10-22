@@ -1,0 +1,4 @@
+base 154e12a ship (firstmate --mode no-mistakes): guard count = 0
+base 154e12a rexlab (firstmate --mode no-mistakes --rex-lab): guard count = 1
+base 154e12a scout (firstmate --scout): guard count = 0
+base 154e12a secondmate (--secondmate alpha): guard count = 0

@@ -1,0 +1,113 @@
+=== ship-nm: fm-brief.sh rg-ship-nm firstmate --mode no-mistakes
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-ship-nm/brief.md (ship, mode=no-mistakes; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+84-   Use absolute paths, `git -C <abs>`, or a `( cd <abs> && ... )` subshell.
+85-   Pass this rule to every sub-agent you launch.
+86:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+87-
+
+=== ship-direct: fm-brief.sh rg-ship-direct firstmate --mode direct-PR
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-ship-direct/brief.md (ship, mode=direct-PR; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+81-   Use absolute paths, `git -C <abs>`, or a `( cd <abs> && ... )` subshell.
+82-   Pass this rule to every sub-agent you launch.
+83:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+84-
+
+=== ship-local: fm-brief.sh rg-ship-local firstmate --mode local-only
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-ship-local/brief.md (ship, mode=local-only; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+81-   Use absolute paths, `git -C <abs>`, or a `( cd <abs> && ... )` subshell.
+82-   Pass this rule to every sub-agent you launch.
+83:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+84-
+
+=== ship-rexlab: fm-brief.sh rg-ship-rexlab firstmate --mode no-mistakes --rex-lab
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-ship-rexlab/brief.md (ship, mode=no-mistakes; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+97-   Use absolute paths, `git -C <abs>`, or a `( cd <abs> && ... )` subshell.
+98-   Pass this rule to every sub-agent you launch.
+99:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+100-
+
+=== ship-herdrlab: fm-brief.sh rg-ship-herdrlab firstmate --mode no-mistakes --herdr-lab
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-ship-herdrlab/brief.md (ship, mode=no-mistakes; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+102-   Use absolute paths, `git -C <abs>`, or a `( cd <abs> && ... )` subshell.
+103-   Pass this rule to every sub-agent you launch.
+104:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+105-
+
+=== scout: fm-brief.sh rg-scout firstmate --scout
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-scout/brief.md (scout; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+72-   Use absolute paths, `git -C <abs>`, or a `( cd <abs> && ... )` subshell.
+73-   Pass this rule to every sub-agent you launch.
+74:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+75-
+
+=== scout-rexlab: fm-brief.sh rg-scout-rexlab firstmate --scout --rex-lab
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-scout-rexlab/brief.md (scout; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+85-   Use absolute paths, `git -C <abs>`, or a `( cd <abs> && ... )` subshell.
+86-   Pass this rule to every sub-agent you launch.
+87:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+88-
+
+=== secondmate: fm-brief.sh rg-secondmate --secondmate alpha
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-secondmate/brief.md (secondmate charter)
+exit=0
+guard count: 1
+18-Act only on tasks the main firstmate routes to you.
+19-Never start a survey, audit, or "find improvements" sweep on your own initiative; that is not your job and it is unwanted.
+20:Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+21-
+
+=== secondmate-noproj: fm-brief.sh rg-secondmate-noproj --secondmate --no-projects
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-secondmate-noproj/brief.md (secondmate charter)
+exit=0
+guard count: 1
+18-Act only on tasks the main firstmate routes to you.
+19-Never start a survey, audit, or "find improvements" sweep on your own initiative; that is not your job and it is unwanted.
+20:Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+21-
+
+=== gerrit: fm-brief.sh rg-gerrit firstmate --mode no-mistakes --forge gerrit (config/wait-no-turns present)
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-gerrit/brief.md (ship, mode=no-mistakes forge=gerrit shape=squash; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+61:7. Never administer infrastructure that every lane shares. Two things are shared:
+83:8. Never start a shell command with `cd`, and never run a search whose path depends on the current directory.
+86:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+
+=== base: fm-brief.sh rg-base firstmate --mode direct-PR --base-branch main (config/wait-no-turns present)
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-base/brief.md (ship, mode=direct-PR; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+59:7. Never administer infrastructure that every lane shares. Two things are shared:
+81:8. Never start a shell command with `cd`, and never run a search whose path depends on the current directory.
+84:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+
+=== scoutbase: fm-brief.sh rg-scoutbase firstmate --scout --base-branch main (config/wait-no-turns present)
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-scoutbase/brief.md (scout; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+50:7. Never administer infrastructure that every lane shares. Two things are shared:
+72:8. Never start a shell command with `cd`, and never run a search whose path depends on the current directory.
+75:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+
+=== waitnoturns: fm-brief.sh rg-waitnoturns firstmate --mode no-mistakes (config/wait-no-turns present)
+scaffolded: /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//fm-lab.wTtAnp/data/rg-waitnoturns/brief.md (ship, mode=no-mistakes; replace {TASK} and {FIRSTMATE_SPEC})
+exit=0
+guard count: 1
+61:7. Never administer infrastructure that every lane shares. Two things are shared:
+83:8. Never start a shell command with `cd`, and never run a search whose path depends on the current directory.
+86:9. Ignore any Rex hook prompt to rename a session: your Rex session is shared, and firstmate finds it by its name.
+
