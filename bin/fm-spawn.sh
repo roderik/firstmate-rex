@@ -1112,7 +1112,7 @@ fi
 
 spawn_remote_secondmate() {
   local id=$1 remote host root home harness positional model effort backend out rc meta tmp
-  local remote_backend remote_target remote_harness remote_herdr_session remote_rex_session registry_lock remote_lock remote_generation
+  local remote_backend remote_target remote_harness remote_herdr_session registry_lock remote_lock remote_generation
   local remote_traceparent remote_recorded_traceparent sm_primary_head sync_out sync_rc account_config
   local -a launch_args
   id=${POS[0]:-}
@@ -1335,7 +1335,6 @@ spawn_remote_secondmate() {
   remote_target=$(printf '%s\n' "$out" | sed -n 's/^target=//p' | tail -1)
   remote_harness=$(printf '%s\n' "$out" | sed -n 's/^harness=//p' | tail -1)
   remote_herdr_session=$(printf '%s\n' "$out" | sed -n 's/^herdr_session=//p' | tail -1)
-  remote_rex_session=$(printf '%s\n' "$out" | sed -n 's/^rex_session=//p' | tail -1)
   if [ "$remote_backend" != "$backend" ]; then
     fm_lock_release "$remote_lock" || true
     fm_lock_release "$registry_lock" || true
@@ -1350,15 +1349,7 @@ spawn_remote_secondmate() {
     echo "error: remote launch returned malformed route metadata; preserving the remote route for reconciliation" >&2
     return 1
   }
-  if [ "$backend" = rex ]; then
-    if [ "$remote_rex_session" != "fm-$id" ]; then
-      fm_lock_release "$remote_lock" || true
-      fm_lock_release "$registry_lock" || true
-      fm_lock_release "$SPAWN_TASK_LOCK" || true
-      echo "error: remote launch returned Rex session '${remote_rex_session:-missing}', expected 'fm-$id'; preserving the remote route for reconciliation" >&2
-      return 1
-    fi
-  elif [ "$remote_herdr_session" != fm-remote ] || [ "${remote_target%%:*}" != "$remote_herdr_session" ]; then
+  if [ "$backend" != rex ] && { [ "$remote_herdr_session" != fm-remote ] || [ "${remote_target%%:*}" != "$remote_herdr_session" ]; }; then
     fm_lock_release "$remote_lock" || true
     fm_lock_release "$registry_lock" || true
     fm_lock_release "$SPAWN_TASK_LOCK" || true
@@ -1391,11 +1382,7 @@ spawn_remote_secondmate() {
     echo "remote_host=$host"
     echo "remote_root=$root"
     echo "remote_backend=$remote_backend"
-    if [ "$backend" = rex ]; then
-      echo "remote_rex_session=$remote_rex_session"
-    else
-      echo "remote_herdr_session=$remote_herdr_session"
-    fi
+    [ "$backend" = rex ] || echo "remote_herdr_session=$remote_herdr_session"
     echo "remote_target=$remote_target"
     [ -z "$remote_recorded_traceparent" ] || echo "traceparent=$remote_recorded_traceparent"
   } >"$tmp"

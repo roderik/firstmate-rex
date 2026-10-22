@@ -2282,7 +2282,7 @@ That server is the one the captain's Rex client was connected to, so every sessi
 | --- | --- | --- |
 | Readiness | `fm-on.sh <id> fm-remote-doctor.sh --backend rex`, through the remote job worker | `check rex=ok` (the bundle CLI), `check rex-server=ok` (the app server's socket), and the job worker, GUI session, and entrypoint checks passed with no Herdr checks. |
 | Seed | `fm-remote-home-seed.sh --backend rex <id> <alias> <root> <home> --no-projects` | Gated readiness for Rex and provisioned the home. |
-| Launch | `fm-spawn.sh <id> --secondmate --backend rex --harness claude` | Opened a real Claude second mate as the only tab (`2ndmate·<id>`) of a new `fm-<id>` session; the parent record holds `remote_backend=rex` and `remote_rex_session=fm-<id>`. |
+| Launch | `fm-spawn.sh <id> --secondmate --backend rex --harness claude` | Opened a real Claude second mate as the only tab (`2ndmate·<id>`) of a new `fm-<id>` session; the parent record holds `remote_backend=rex`. |
 | Route and state | `fm-remote-secondmate-control.sh state`, `route`, `observe`, `capture` | `alive`, the Rex route block, a busy then idle observation, and the pane text. |
 | Steer and reply | `fm-send.sh <id> '<request>'` | Stored the request in the host's steering inbox and rang the doorbell into the Rex pane; the agent handled it and moved it to `handled/`, and its correlated reply settled the parent's pending-reply record. |
 | Keys | `fm-send.sh <id> --key C-l` | Delivered through the adapter by the recorded block and its scoped label. |
