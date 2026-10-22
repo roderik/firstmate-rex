@@ -2372,7 +2372,8 @@ On 2026-10-22, with `rex 0.0.1792519967-gd05acf` (API revision 4) on lab servers
 Remote panes were checked against ds9's own Rex server (`rex 0.0.1792607779-g171246`, API revision 5) over the tailnet: a probe session with two tabs, recorded in a lab home as a remote second mate's `remote_target`, resolved through `fm-rex-popup.sh plan this|answer --server ds9` to that second mate as `remote-mate` for its own pane and `remote-worker` for the other tab, with the popup sent to the lab's `fm-local` session; the probe session was then killed, and ds9 listed no sessions.
 
 The Rex app itself was not driven, because attaching it to a lab server would change the captain's own app.
-So the palette entries, assigning a shortcut, the `ctx.server` value the app passes for another host's pane, and `session.select` on a session of another host come from Rex's `client.action` schema and documentation, not from observation.
+So the palette entries, assigning a shortcut, and the `ctx.server` value the app passes for another host's pane come from Rex's `client.action` schema and documentation, not from observation.
+Because `session.select` on another host's session was never observed, the commands only ever select a session on this machine.
 `rex api call client.action` with `server` set cannot stand in for the app, because the CLI first attaches to the named `session_id` on the server it calls and fails with `session_not_found`.
 
 The palette smoke on a lab server passed:

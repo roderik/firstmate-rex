@@ -124,7 +124,7 @@ Firstmate can add its own commands to the Rex command palette, grouped under **F
 Installing them edits the captain's Rex `init.lua` and reloads every connected client's keymap, so Firstmate installs them only on the captain's word:
 
 ```sh
-bin/fm-rex-palette.sh install    # also: uninstall, status, check
+bin/fm-rex-palette.sh install    # also: uninstall
 ```
 
 - The installer owns only one marked block at the top of that file, so the captain's own later lines always win, and `uninstall` leaves the rest of the file byte for byte as it was.
@@ -150,6 +150,7 @@ A popup closes itself when its command ends.
 On a pane that lives on another host, such as a remote second mate's, a command resolves the pane to that second mate from this home's records: its own pane, or any pane in its `fm-<id>` session, because Firstmate reaches a second mate's workers only through the second mate.
 Peek then uses the remote route, and notes name the second mate.
 A popup always runs on this machine, so for such a pane it opens in this machine's `fm-local` session and Rex is asked to show that session; without one the command says so.
+Go to Waiting Worker likewise shows this machine's `fm-local` session for a remote second mate, never a session on the other host.
 
 Rex gives a command 30 seconds and runs it in the Rex server's own environment, so each command only asks `bin/fm-rex-popup.sh plan` what to do and leaves slow work to the popup, and the installer records the operator's `PATH` and `FM_HOME`.
 A command run from the CLI never moves the captain's view; only a key or palette use does.

@@ -110,7 +110,6 @@ local ACTIONS = {
     name = "fm_away", title = "Firstmate: Show or Hide Away Pane", plan = "away",
     description = "Show the hidden away-mode supervisor pane beside your pane, or hide it again. It keeps running either way.",
     keywords = "firstmate away afk supervisor daemon pane show hide",
-    args = { show = "boolean?" },
   },
   {
     name = "fm_answer", title = "Firstmate: Answer Decision", plan = "answer",
@@ -146,8 +145,6 @@ function M.setup(cfg)
         local extra = {}
         if a.plan == "goto" and args.task ~= nil then
           extra = { "--task", tostring(args.task) }
-        elseif a.plan == "away" and args.show ~= nil then
-          extra = { args.show and "--show" or "--hide" }
         end
         return apply(ctx, plan(cfg, ctx, a.plan, extra))
       end,

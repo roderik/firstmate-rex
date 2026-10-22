@@ -9,8 +9,6 @@
 # Usage:
 #   fm-rex-palette.sh install [--server <unix://...>]
 #   fm-rex-palette.sh uninstall [--server <unix://...>]
-#   fm-rex-palette.sh status [--server <unix://...>]
-#   fm-rex-palette.sh check [--server <unix://...>]
 #
 # The server is --server, else FM_REX_SERVER, else REX_SERVER (set inside a
 # Rex pane), else the default local Rex server; it must be a local unix://
@@ -34,10 +32,10 @@
 # Each write builds the new file next to the old one, requires `rex config
 # check` to pass on it, copies the old file to <file>.fm-backup.<UTC stamp>,
 # keeps its permission bits, renames the new file over it, and then runs
-# `rex config reload`. uninstall removes exactly the block's lines, so the rest
-# of the file stays byte-for-byte what it was. check builds and checks without
-# writing. status reports the file, whether the block is there, and which
-# Firstmate actions the server has loaded.
+# `rex config reload`. install on a file that already holds this exact block
+# writes nothing but still reloads, so a rerun after a failed reload loads it.
+# uninstall removes exactly the block's lines, so the rest of the file stays
+# byte-for-byte what it was.
 #
 # Exit status: 0 on success (including nothing to do), 1 on a refusal or a
 # failed step, 2 on a usage error.
@@ -60,7 +58,7 @@ die() {
 }
 
 usage() {
-  sed -n '9,13p' "$0" | sed 's/^# \{0,1\}//' >&2
+  sed -n '9,11p' "$0" | sed 's/^# \{0,1\}//' >&2
   exit 2
 }
 
@@ -227,6 +225,7 @@ cmd_install() {
   if [ -f "$CONFIG" ] && cmp -s "$new" "$CONFIG"; then
     rm -f "$new"
     printf 'unchanged: %s already has this palette block\n' "$CONFIG"
+    reload
     return 0
   fi
   config_check "$new" || { rm -f "$new"; die "rex config check failed on the new $CONFIG; nothing was written"; }
@@ -257,30 +256,6 @@ cmd_uninstall() {
   reload
 }
 
-cmd_check() {
-  local new
-  find_block
-  new=$(tmp_beside)
-  build_installed "$new"
-  config_check "$new" || { rm -f "$new"; die "rex config check failed on the would-be $CONFIG"; }
-  rm -f "$new"
-  printf 'ok: the palette block would load into %s\n' "$CONFIG"
-}
-
-cmd_status() {
-  local actions
-  find_block
-  printf 'server: %s\n' "$SERVER"
-  printf 'config: %s (%s)\n' "$CONFIG" "$([ -e "$CONFIG" ] && echo present || echo absent)"
-  if [ -n "$B_LINE" ]; then
-    printf 'block: lines %s-%s\n' "$B_LINE" "$E_LINE"
-  else
-    printf 'block: absent\n'
-  fi
-  actions=$(rex_s actions --json 2>/dev/null | jq -r '[.actions[]? | .name | select(startswith("fm_"))] | join(" ")' 2>/dev/null)
-  printf 'loaded: %s\n' "${actions:-none}"
-}
-
 main() {
   local cmd=${1:-}
   [ "$#" -gt 0 ] && shift
@@ -291,8 +266,8 @@ main() {
     esac
   done
   case "$cmd" in
-    install | uninstall | status | check) ;;
-    -h | --help | help) sed -n '2,43p' "$0" | sed 's/^# \{0,1\}//'; return 0 ;;
+    install | uninstall) ;;
+    -h | --help | help) sed -n '2,41p' "$0" | sed 's/^# \{0,1\}//'; return 0 ;;
     *) usage ;;
   esac
   [ -n "$SERVER" ] || SERVER=${FM_REX_SERVER:-${REX_SERVER:-}}

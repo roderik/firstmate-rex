@@ -82,9 +82,9 @@ assert_contains "$(cat "$FAKE/log")" "config reload" "install reloads the server
 [ ! -e "$CFG" ] || fail "uninstall left a config that only Firstmate had created"
 pass "install creates an absent config with a created marker, and uninstall deletes it again"
 
-out=$(FM_REX_SERVER= REX_SERVER=unix:///tmp/fm-rex-palette-pane.sock "$INSTALLER" install 2>&1) || fail "install from a Rex pane failed: $out"
+out=$(FM_REX_SERVER='' REX_SERVER=unix:///tmp/fm-rex-palette-pane.sock "$INSTALLER" install 2>&1) || fail "install from a Rex pane failed: $out"
 assert_contains "$(cat "$CFG")" 'server = "unix:///tmp/fm-rex-palette-pane.sock"' "the block records the pane's REX_SERVER"
-FM_REX_SERVER= REX_SERVER=unix:///tmp/fm-rex-palette-pane.sock "$INSTALLER" uninstall >/dev/null 2>&1 || fail "uninstall from a Rex pane failed"
+FM_REX_SERVER='' REX_SERVER=unix:///tmp/fm-rex-palette-pane.sock "$INSTALLER" uninstall >/dev/null 2>&1 || fail "uninstall from a Rex pane failed"
 pass "install from a Rex pane records that pane's server"
 
 # The captain's own file, without a trailing newline.
@@ -103,11 +103,13 @@ assert_equals 1 "$(backups)" "install backs up the captain's config"
 cmp -s "$(find "$CFG_DIR" -name 'init.lua.fm-backup.*' | head -1)" "$TMP_ROOT/orig.lua" || fail "the backup is not the captain's original file"
 pass "install puts the block on top, keeps the captain's lines and mode, and backs the file up"
 
+: >"$FAKE/log"
 out=$("$INSTALLER" install 2>&1) || fail "a second install failed"
 assert_contains "$out" "unchanged" "a second install reports nothing to change"
 assert_equals 1 "$(backups)" "an unchanged install writes no second backup"
+assert_contains "$(cat "$FAKE/log")" "config reload" "an unchanged install still reloads, so a rerun after a failed reload loads the block"
 [ "$(grep -c -x -F -- '-- >>> firstmate palette >>>' "$CFG")" = 1 ] || fail "a second install duplicated the block"
-pass "install is idempotent"
+pass "install is idempotent and reloads even when the file is unchanged"
 
 "$INSTALLER" uninstall >/dev/null 2>&1 || fail "uninstall failed"
 cmp -s "$CFG" "$TMP_ROOT/orig.lua" || fail "uninstall did not restore the captain's file byte for byte"
@@ -159,11 +161,6 @@ assert_equals "-- >>> firstmate palette >>>" "$(head -1 "$TMP_ROOT/dotfiles/init
 cmp -s "$TMP_ROOT/dotfiles/init.lua" "$TMP_ROOT/orig.lua" || fail "uninstall through a symlink did not restore the target"
 rm -f "$CFG"
 pass "a symlinked config is edited at its target and the link survives"
-
-out=$("$INSTALLER" status 2>&1) || fail "status failed"
-assert_contains "$out" "block: absent" "status reports a missing block"
-assert_contains "$out" "loaded: fm_fleet" "status lists the loaded Firstmate actions"
-pass "status reports the block and the loaded actions"
 
 # --- plan --------------------------------------------------------------------------
 
@@ -226,8 +223,10 @@ assert_equals charlie "$(printf '%s' "$out" | jq -r .task)" "goto picks the work
 assert_equals "session:$LSID window:$LWID" "$(printf '%s' "$out" | jq -r '"\(.select.session_id) \(.select.window_id)"')" "goto selects the task's session and live window"
 rm -f "$STATE/charlie.status"
 assert_equals bravo "$("$POPUP" plan goto | jq -r .task)" "goto picks a blocker before a done PR"
+jq -nc --arg s "session:$FMLOCAL" '{sessions:[{session_id:$s,label:"fm-local"}]}' >"$FAKE/ls.json"
 out=$("$POPUP" plan goto --task mate1) || fail "plan goto --task on a remote mate failed"
-assert_equals "session:$MSID" "$(printf '%s' "$out" | jq -r .select.session_id)" "goto selects a remote second mate's session"
+assert_equals "session:$FMLOCAL" "$(printf '%s' "$out" | jq -r .select.session_id)" "goto shows the local fm-local session for a remote second mate, never another host's session id"
+assert_contains "$(printf '%s' "$out" | jq -r .message)" "another host" "goto says the second mate runs on another host"
 rm -f "$STATE/alpha.status" "$STATE/bravo.status"
 if out=$("$POPUP" plan goto 2>&1); then fail "goto succeeded with nobody waiting"; fi
 assert_contains "$out" "no worker is waiting" "goto reports that nobody waits"
@@ -251,8 +250,6 @@ out=$("$POPUP" plan away --session "session:$ASID" --block "block:$LBID") || fai
 assert_equals hidden "$(printf '%s' "$out" | jq -r .away)" "a shown away pane is hidden"
 assert_contains "$(cat "$FAKE/log")" "session.detach_block" "hiding detaches the block"
 assert_not_contains "$(cat "$FAKE/log")" "close" "hiding never closes the away pane"
-out=$("$POPUP" plan away --show --session "session:$ASID" --block "block:$LBID") || fail "plan away --show failed"
-assert_equals shown "$(printf '%s' "$out" | jq -r .away)" "--show on a shown pane keeps it shown"
 rm -f "$STATE/.afk-daemon-terminal"
 if out=$("$POPUP" plan away --session "session:$ASID" 2>&1); then fail "away succeeded without an away record"; fi
 assert_contains "$out" "away mode is not running" "away without a record says so"
@@ -279,4 +276,5 @@ pass "the answer, note, and merge popups only file captain inbox notes"
 
 out=$(printf '\n' | "$POPUP" this mate1 2>&1) || fail "the this body failed: $out"
 assert_contains "$out" "Task:      mate1 (secondmate)" "a task without a project names only its kind"
-pass "the this popup omits the project for a task without one"
+assert_contains "$out" "Latest:    no status yet" "a task without a status line says so"
+pass "the this popup omits the project and names a missing status for a task without them"

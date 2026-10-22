@@ -12,7 +12,7 @@
 #
 # Usage:
 #   fm-rex-popup.sh plan <action> [--session <id>] [--block <id>] [--server <name>]
-#                                 [--task <id>] [--show | --hide]
+#                                 [--task <id>]
 #   fm-rex-popup.sh fleet
 #   fm-rex-popup.sh this <task>
 #   fm-rex-popup.sh peek <task>
@@ -44,9 +44,10 @@
 #
 # goto selects --task, or else the first task waiting on the captain, ranked
 # decision or captain hold, then blocked, then failed, then a done PR, ties by
-# task id. away shows the away supervisor's detached pane beside a pane of its
-# session (move_block) or hides it again (detach_block), toggling by default;
-# it never closes it.
+# task id. A remote second mate's session lives on another host's server, so
+# for one goto selects this machine's fm-local session instead. away toggles
+# the away supervisor's detached pane: it shows it beside a pane of its session
+# (move_block) or hides it again (detach_block), and never closes it.
 #
 # The answer, note, and merge bodies only ever file a captain inbox note through
 # bin/fm-inbox.sh (with a fresh request id), in these shapes:
@@ -137,21 +138,27 @@ resolve_pane() { # <server-name> <session> <block>
   return 0
 }
 
+# The one live local session labeled fm-local, or fails naming <why>.
+local_session() { # <why>
+  local out sid count
+  rex_ready
+  out=$(fm_backend_rex_cli_json ls --json) || die "cannot read this machine's Rex sessions"
+  count=$(printf '%s' "$out" | jq --arg l "$FM_REX_POPUP_LOCAL_SESSION" '[.sessions[]? | select(.label == $l)] | length')
+  [ "$count" = 1 ] || die "$1; Firstmate uses this machine's $FM_REX_POPUP_LOCAL_SESSION session for that, and $count are open"
+  sid=$(printf '%s' "$out" | jq -r --arg l "$FM_REX_POPUP_LOCAL_SESSION" '.sessions[] | select(.label == $l) | .session_id')
+  printf '%s' "$sid"
+}
+
 # The session the popup opens in: the focused one when it is local, else the
-# one live local session labeled fm-local, which the app is then asked to show.
+# local fm-local session, which the app is then asked to show.
 popup_session() { # <server-name> <session>
-  local server=$1 session=$2 out sid count
+  local server=$1 session=$2
   if [ -z "$server" ]; then
     case "$session" in session:?*) ;; *) die "the palette gave no session to open the popup in" ;; esac
     printf '%s' "$session"
     return 0
   fi
-  rex_ready
-  out=$(fm_backend_rex_cli_json ls --json) || die "cannot read this machine's Rex sessions to show the popup"
-  count=$(printf '%s' "$out" | jq --arg l "$FM_REX_POPUP_LOCAL_SESSION" '[.sessions[]? | select(.label == $l)] | length')
-  [ "$count" = 1 ] || die "this pane is on $server; Firstmate shows its popups in this machine's $FM_REX_POPUP_LOCAL_SESSION session, and $count are open"
-  sid=$(printf '%s' "$out" | jq -r --arg l "$FM_REX_POPUP_LOCAL_SESSION" '.sessions[] | select(.label == $l) | .session_id')
-  printf '%s' "$sid"
+  local_session "this pane is on $server and a popup runs on this machine"
 }
 
 # The argv a popup runs: this script with the environment it needs.
@@ -186,11 +193,13 @@ waiting_rank() { # <task> <kind>
   esac
 }
 
-# Sets G_SESSION and G_WINDOW for a task with a Rex tab, or fails.
+# Sets G_SESSION and G_WINDOW for a task with a Rex tab, and G_REMOTE to 1
+# for a remote second mate, or fails.
 goto_target() { # <task>
   local meta="$STATE/$1.meta" out
   G_SESSION=
   G_WINDOW=
+  G_REMOTE=0
   [ -f "$meta" ] && [ ! -L "$meta" ] || return 1
   if [ "$(fm_meta_get "$meta" backend)" = rex ]; then
     [ -n "$(fm_meta_get "$meta" rex_session_id)" ] || return 1
@@ -205,9 +214,8 @@ goto_target() { # <task>
     return 0
   fi
   if [ "$(fm_meta_get "$meta" remote_backend)" = rex ]; then
-    out=$(fm_meta_get "$meta" remote_target)
-    case "$out" in ?*:?*) ;; *) return 1 ;; esac
-    G_SESSION="session:${out%%:*}"
+    G_SESSION=$(local_session "$1 runs on another host, whose session the app may not show") || exit 1
+    G_REMOTE=1
     return 0
   fi
   return 1
@@ -233,8 +241,8 @@ first_waiting() {
 
 # --- away pane -------------------------------------------------------------------
 
-plan_away() { # <mode> <server-name> <session> <block>
-  local mode=$1 server=$2 session=$3 block=$4 record backend target rserver rest out placement sid bid anchor=''
+plan_away() { # <server-name> <session> <block>
+  local server=$1 session=$2 block=$3 record backend target rserver rest out placement sid bid anchor=''
   record="$STATE/.afk-daemon-terminal"
   [ -f "$record" ] || die "away mode is not running in a hidden Rex pane"
   IFS=$'\t' read -r backend target rserver rest <"$record" || true
@@ -246,31 +254,24 @@ plan_away() { # <mode> <server-name> <session> <block>
   bid=$FM_BACKEND_REX_BLOCK_ID
   out=$(FM_BACKEND_REX_SERVER=$rserver fm_backend_rex_block_inspect "$target") || die "the away pane is gone or its Rex server is unreachable"
   placement=$(printf '%s' "$out" | jq -r '.block.placement // empty')
-  if [ "$mode" = toggle ]; then
-    if [ "$placement" = detached ]; then mode=show; else mode=hide; fi
-  fi
-  if [ "$mode" = hide ]; then
-    if [ "$placement" != detached ]; then
-      FM_BACKEND_REX_SERVER=$rserver fm_backend_rex_cli_json api call -s "$sid" session.detach_block \
-        "$(jq -nc --arg b "$bid" '{block_id:$b}')" >/dev/null || die "Rex could not hide the away pane"
-    fi
+  if [ "$placement" != detached ]; then
+    FM_BACKEND_REX_SERVER=$rserver fm_backend_rex_cli_json api call -s "$sid" session.detach_block \
+      "$(jq -nc --arg b "$bid" '{block_id:$b}')" >/dev/null || die "Rex could not hide the away pane"
     jq -nc '{action:"away", task:null, pane:null, away:"hidden", message:"Away pane hidden; it keeps running."}'
     return 0
   fi
-  if [ "$placement" = detached ]; then
-    if [ -z "$server" ] && [ "$session" = "$sid" ] && [ -n "$block" ] && [ "$block" != "$bid" ]; then
-      anchor=$block
-    else
-      out=$(FM_BACKEND_REX_SERVER=$rserver fm_backend_rex_cli_json api call -s "$sid" session.list_blocks '{}') \
-        || die "cannot read the away pane's session"
-      anchor=$(printf '%s' "$out" | jq -r --arg b "$bid" \
-        '[.blocks[]? | select(.block_id != $b and .placement == "placed") | .block_id][0] // empty')
-    fi
-    [ -n "$anchor" ] || die "the away pane's session has no pane to show it beside"
-    FM_BACKEND_REX_SERVER=$rserver fm_backend_rex_cli_json api call -s "$sid" session.move_block \
-      "$(jq -nc --arg b "$bid" --arg a "$anchor" '{block_id:$b, anchor_block_id:$a, direction:"vertical", side:"after", ratio:0.7}')" \
-      >/dev/null || die "Rex could not show the away pane"
+  if [ -z "$server" ] && [ "$session" = "$sid" ] && [ -n "$block" ] && [ "$block" != "$bid" ]; then
+    anchor=$block
+  else
+    out=$(FM_BACKEND_REX_SERVER=$rserver fm_backend_rex_cli_json api call -s "$sid" session.list_blocks '{}') \
+      || die "cannot read the away pane's session"
+    anchor=$(printf '%s' "$out" | jq -r --arg b "$bid" \
+      '[.blocks[]? | select(.block_id != $b and .placement == "placed") | .block_id][0] // empty')
   fi
+  [ -n "$anchor" ] || die "the away pane's session has no pane to show it beside"
+  FM_BACKEND_REX_SERVER=$rserver fm_backend_rex_cli_json api call -s "$sid" session.move_block \
+    "$(jq -nc --arg b "$bid" --arg a "$anchor" '{block_id:$b, anchor_block_id:$a, direction:"vertical", side:"after", ratio:0.7}')" \
+    >/dev/null || die "Rex could not show the away pane"
   if [ -z "$server" ] && [ "$session" = "$sid" ]; then
     jq -nc '{action:"away", task:null, pane:null, away:"shown", message:"Away pane shown below; run the action again to hide it."}'
   else
@@ -281,7 +282,7 @@ plan_away() { # <mode> <server-name> <session> <block>
 # --- plan ------------------------------------------------------------------------
 
 cmd_plan() {
-  local action=${1:-} session='' block='' server='' task='' away_mode=toggle layer_session command message pane select=
+  local action=${1:-} session='' block='' server='' task='' layer_session command message pane select=
   [ -n "$action" ] || usage
   shift
   while [ "$#" -gt 0 ]; do
@@ -293,15 +294,13 @@ cmd_plan() {
       --block) block=$2; shift 2 ;;
       --server) server=$2; shift 2 ;;
       --task) task=$2; shift 2 ;;
-      --show) away_mode=show; shift ;;
-      --hide) away_mode=hide; shift ;;
       *) die "unknown plan option: $1" ;;
     esac
   done
   [ -z "$task" ] || task_ok "$task" || die "invalid task id: $task"
   case "$action" in
     away)
-      plan_away "$away_mode" "$server" "$session" "$block"
+      plan_away "$server" "$session" "$block"
       return
       ;;
     goto)
@@ -309,8 +308,10 @@ cmd_plan() {
         task=$(first_waiting) || die "no worker is waiting on you"
       fi
       goto_target "$task" || die "$task has no Rex tab to go to"
-      jq -nc --arg t "$task" --arg s "$G_SESSION" --arg w "$G_WINDOW" \
-        '{action:"goto", task:$t, pane:null, select:({session_id:$s} + (if $w == "" then {} else {window_id:$w} end)), message:("Showing " + $t)}'
+      message="Showing $task"
+      [ "$G_REMOTE" = 0 ] || message="Second mate $task runs on another host; showing this machine's $FM_REX_POPUP_LOCAL_SESSION session"
+      jq -nc --arg t "$task" --arg s "$G_SESSION" --arg w "$G_WINDOW" --arg m "$message" \
+        '{action:"goto", task:$t, pane:null, select:({session_id:$s} + (if $w == "" then {} else {window_id:$w} end)), message:$m}'
       return
       ;;
     fleet | this | peek | answer | note | merge) ;;
@@ -386,7 +387,7 @@ body_this() {
       else
         "Task:      \($r.id) (\($r.kind // "ship")\(if ($r.project // "") != "" then ", project " + $r.project else "" end))",
         (if $r.remote then "Runs on:   \($r.remote.host // "another host") (second mate)" else empty end),
-        "Latest:    \($r.hints.last_event_text // "no status yet")",
+        "Latest:    \(if ($r.hints.last_event_text // "") != "" then $r.hints.last_event_text else "no status yet" end)",
         (($r.hints.open_decisions // [])[] | "Decision:  [\(.key // "-")] \(.summary // "")"),
         (if ($r.pr.url // "") != "" then "PR:        \($r.pr.url)" else empty end)
       end'
@@ -510,7 +511,7 @@ main() {
       [ "$#" -eq 0 ] || task_ok "$1" || usage
       "body_$cmd" "$@"
       ;;
-    -h | --help | help) sed -n '2,65p' "$0" | sed 's/^# \{0,1\}//' ;;
+    -h | --help | help) sed -n '2,66p' "$0" | sed 's/^# \{0,1\}//' ;;
     *) usage ;;
   esac
 }
