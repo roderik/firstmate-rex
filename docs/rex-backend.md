@@ -96,13 +96,14 @@ Spawning and that cleanup share one home-wide lock (`state/.rex-session.lock`), 
 A worker running in its own Rex pane can open side panes beside itself in its tab, so the captain sees a test run, a dev server, or validation progress next to the worker.
 
 ```sh
-bin/fm-rex-side.sh open tests --wait -- make test
-bin/fm-rex-side.sh open dev --right -- env PORT=3000 npm run dev
+bin/fm-rex-side.sh open tests -- make test
+bin/fm-rex-side.sh open dev -- env PORT=3000 npm run dev
 bin/fm-rex-side.sh list
 bin/fm-rex-side.sh close dev
 ```
 
-- A side pane opens without taking focus and stays open after its command exits, so its last output stays readable; `--wait` returns the command's exit status.
+- A side pane opens below the worker without taking focus and stays open after its command exits, so its last output stays readable; `list` shows whether each one is running or exited, with its exit status.
+- A name already open in the tab refuses until `close <name>` closes it.
 - Its label is `<worker block label>/<name>`, for example `fm-firstmate-42de5bad-t1/tests`, because Rex records no creating client on a block.
 - The helper acts only from a proven worker pane, with the same structural proof as detection, and refuses with nothing changed anywhere else.
 - Cleanup closes exactly the task's labeled side panes in its current and recorded tabs, so no orphan tab is left even after the worker's pane moved; a foreign pane in those tabs is never closed, and a side pane that does not close fails the cleanup.

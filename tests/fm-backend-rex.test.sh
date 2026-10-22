@@ -579,12 +579,13 @@ test_side_pane_helper() {
   [ "$out" = "tests"$'\t'"block:$sp" ] || fail "open should print the name and new block id, got '$out'"
   calls | grep -q "^clean -S $SERVER --autostart=false split -s session:$LSID -b block:$LBID --split below --ratio 35 --focus=false --keep-open --label $label/tests -c $PWD --json -- make test\$" \
     || fail "open must split the worker's own pane unfocused and labeled, with REX_* scrubbed: $(calls | grep split)"
-  side open dev --right --ratio 50 -- npm run dev >/dev/null || fail "open --right --ratio should succeed"
-  calls | grep -q " split .* --split right --ratio 50 .*--label $label/dev " || fail "open must pass --right and --ratio"
-  printf '7' >"$FAKE/wait.exit"
-  rc=0; side open tests2 --wait -- false >/dev/null || rc=$?
-  [ "$rc" -eq 7 ] || fail "open --wait must exit with the command's status, got $rc"
-  calls | grep -q " wait block:$sp -s session:$LSID" || fail "open --wait must wait on the new pane"
+  for opt in --wait --right "--ratio 50" --below; do
+    # shellcheck disable=SC2086
+    rc=0; side open dev $opt -- npm run dev >/dev/null 2>&1 || rc=$?
+    [ "$rc" -eq 2 ] || fail "open must reject the removed option $opt as a usage error, got $rc"
+  done
+  rc=0; side open dev npm run dev >/dev/null 2>&1 || rc=$?
+  [ "$rc" -eq 2 ] || fail "open must require -- before the command, got $rc"
 
   printf '{"blocks":[{"block_id":"block:%s","label":"%s","window_id":"window:%s"},{"block_id":"block:%s","label":"%s/tests","window_id":"window:%s"},{"block_id":"block:%s","label":"%s/dev","window_id":"window:%s"},{"block_id":"block:%s","label":"captain","window_id":"window:%s"}]}' \
     "$LBID" "$label" "$WID" "$sp" "$label" "$WID" "$sp2" "$label" "$WID" "$BID" "$WID" >"$FAKE/blocks/session_$LSID.json"
@@ -592,24 +593,21 @@ test_side_pane_helper() {
   process_json "$sp2" '{"last_exit":null}'
   out=$(side list) || fail "list should succeed"
   [ "$out" = "tests"$'\t'"exited 1"$'\t'"block:$sp"$'\n'"dev"$'\t'"running"$'\t'"block:$sp2" ] || fail "list should show this worker's side panes and their state, got '$out'"
-  out=$(side open dev -- npm run dev 2>&1) && fail "open must refuse to replace a running side pane"
-  assert_contains "$out" "still running" "the running-pane refusal should say so"
-  inspect_json "$sp" "$LSID" "$label/tests"
-  : >"$FAKE/close-removes"
   : >"$FAKE/log"
-  side open tests -- make test >/dev/null || fail "open should replace an exited same-named side pane"
-  [ "$(calls | grep -n " block close -s session:$LSID block:$sp" | cut -d: -f1)" -lt "$(calls | grep -n " split " | cut -d: -f1)" ] \
-    || fail "the exited pane must close before its replacement opens"
+  for name in dev tests; do
+    out=$(side open "$name" -- npm run dev 2>&1) && fail "open must refuse a name already open in the tab, running or exited ($name)"
+    assert_contains "$out" "already open" "the same-name refusal should say so"
+  done
+  calls | grep -q " split \| close" && fail "a same-name refusal must change nothing"
   inspect_json "$sp2" "$LSID" "$label/dev"
+  : >"$FAKE/close-removes"
   out=$(side close dev) || fail "close should succeed"
   [ "$out" = "closed"$'\t'"dev"$'\t'"block:$sp2" ] || fail "close should report the closed pane, got '$out'"
+  calls | grep -q " block close -s session:$LSID block:$sp\$" && fail "close <name> must close only that side pane"
+  calls | grep -q " block close -s session:$LSID block:$BID" && fail "close must never close a foreign pane"
   out=$(side close nope 2>&1) && fail "closing an unknown side pane must fail"
-  : >"$FAKE/log"
-  inspect_json "$sp" "$LSID" "$label/tests"
-  inspect_json "$sp2" "$LSID" "$label/dev"
-  side close --all >/dev/null || fail "close --all should succeed"
-  calls | grep -q " block close -s session:$LSID block:$sp\$" || fail "close --all must close every side pane"
-  calls | grep -q " block close -s session:$LSID block:$BID" && fail "close --all must never close a foreign pane"
+  rc=0; side close --all >/dev/null 2>&1 || rc=$?
+  [ "$rc" -eq 2 ] || fail "close --all was removed and must be a usage error, got $rc"
 
   : >"$FAKE/log"
   process_json "$LBID" '{"child":{"pid":999999},"foreground":{"pid":999999},"last_exit":null}'
@@ -626,7 +624,7 @@ test_side_pane_helper() {
   [ "$rc" -eq 2 ] || fail "an invalid name is a usage error, got $rc"
   out=$(side open tests 2>&1); rc=$?
   [ "$rc" -eq 2 ] || fail "open without a command is a usage error, got $rc"
-  pass "fm-rex-side.sh: opens unfocused labeled side panes only from a proven worker pane, lists and closes only its own, and replaces only exited ones"
+  pass "fm-rex-side.sh: opens unfocused labeled side panes only from a proven worker pane, refuses a name already open, and lists and closes only its own"
 }
 
 # --- selection and records -----------------------------------------------------

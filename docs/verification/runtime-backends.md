@@ -2405,11 +2405,10 @@ On 2026-10-22, with `rex 0.0.1792519967-gd05acf` (API revision 4) on lab servers
 | --- | --- | --- |
 | Unfocused split | `split -s <session> -b <worker-block> --split below --ratio 35 --focus=false --keep-open --label <worker-label>/tests --json -- <cmd>` | Returns `block_ids[0]` in the worker's tab; the tab's `focused_block_id` stays the worker's block, and `block ls` lists the new block with that label and the tab's `window_id`. |
 | Kept output | the same split, after its command exits | `capture` still shows the command's output and `com.superlogical.terminal.process` reports `last_exit` with the exit code; without `--keep-open` the pane closes and its id exits 3. |
-| Exit status | `wait <side-block> -s <session>` | Exits with the side command's status (1 and 3 seen). |
 | Orphan tab | `block close` of the worker's block alone | The tab stays open around the side pane, so cleanup closes the worker's labeled side panes too; once they and any foreign pane close, the tab is gone. |
 | Pane limit | `rex server start --help` | `--max-panes N` refuses new panes once a window holds N (default 64). |
 
-The real smoke runs `fm-rex-side.sh` inside a task pane, then proves the test pane's exit status and kept output, an unchanged focus, cleanup closing both side panes while a foreign pane in the same tab survives, and no tab left once that foreign pane closes.
+The real smoke runs `fm-rex-side.sh` inside a task pane, then proves the test pane's exit status in `list` and its kept output, an unchanged focus, cleanup closing both side panes while a foreign pane in the same tab survives, and no tab left once that foreign pane closes.
 
 ## Codex App host tools
 

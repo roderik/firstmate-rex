@@ -129,10 +129,9 @@ TS="$SID:$BID_S"
 SIDE_LABEL=$(fm_backend_rex_scoped_name fm-smoke-side)
 state=$(wait_state "$TS" dead) || smoke_fail "the side-pane task's shell read '$state', expected dead"
 SIDE_OUT="$TMP_ROOT/side.out"
-fm_backend_rex_send_text_line "$TS" "export REX_SERVER='$FM_REX_SERVER'; '$ROOT/bin/fm-rex-side.sh' open tests --wait -- sh -c 'echo side-tests-ran; exit 3' >'$SIDE_OUT.tmp' 2>&1; echo \"rc=\$?\" >>'$SIDE_OUT.tmp'; '$ROOT/bin/fm-rex-side.sh' open dev -- sleep 600 >>'$SIDE_OUT.tmp' 2>&1; '$ROOT/bin/fm-rex-side.sh' list >>'$SIDE_OUT.tmp' 2>&1; mv '$SIDE_OUT.tmp' '$SIDE_OUT'" fm-smoke-side \
+fm_backend_rex_send_text_line "$TS" "export REX_SERVER='$FM_REX_SERVER'; '$ROOT/bin/fm-rex-side.sh' open tests -- sh -c 'echo side-tests-ran; exit 3' >'$SIDE_OUT.tmp' 2>&1; '$ROOT/bin/fm-rex-side.sh' open dev -- sleep 600 >>'$SIDE_OUT.tmp' 2>&1; for i in \$(seq 1 50); do '$ROOT/bin/fm-rex-side.sh' list | grep -q exited && break; sleep 0.2; done; '$ROOT/bin/fm-rex-side.sh' list >>'$SIDE_OUT.tmp' 2>&1; mv '$SIDE_OUT.tmp' '$SIDE_OUT'" fm-smoke-side \
   || smoke_fail "could not run the side-pane helper inside the task pane"
-for _ in $(seq 1 100); do [ -s "$SIDE_OUT" ] && break; sleep 0.1; done
-grep -qx 'rc=3' "$SIDE_OUT" || smoke_fail "open --wait did not return the side command's status: $(cat "$SIDE_OUT" 2>/dev/null)"
+for _ in $(seq 1 200); do [ -s "$SIDE_OUT" ] && break; sleep 0.1; done
 grep -q "^tests"$'\t'"exited 3"$'\t' "$SIDE_OUT" || smoke_fail "list did not show the exited test pane: $(cat "$SIDE_OUT")"
 grep -q "^dev"$'\t'"running"$'\t' "$SIDE_OUT" || smoke_fail "list did not show the running dev pane: $(cat "$SIDE_OUT")"
 SIDE_TESTS=$(sed -n 's/^tests\texited 3\t//p' "$SIDE_OUT")

@@ -26,35 +26,33 @@
 # through the adapter (bin/backends/rex.sh fm_backend_rex_cli).
 #
 # Usage:
-#   fm-rex-side.sh open <name> [--below|--right] [--ratio PCT] [--wait] -- <command...>
+#   fm-rex-side.sh open <name> -- <command...>
 #   fm-rex-side.sh list
 #   fm-rex-side.sh close <name>
-#   fm-rex-side.sh close --all
 #
-# open splits the worker's pane (below by default, PCT percent of the split,
-# default 35, 10..90) and runs <command...> there through the login shell's
-# environment, not the caller's: pass anything the command needs on its own
-# command line, for example `env PORT=3000 npm run dev`. The working directory
-# is the caller's. A same-named pane whose command has exited is closed and
-# replaced; one still running refuses. It prints "<name>\t<block-id>"; with
-# --wait it then waits for the command and exits with its status.
+# open splits the worker's pane below it (35 percent of the split) and runs
+# <command...> there through the login shell's environment, not the caller's:
+# pass anything the command needs on its own command line, for example
+# `env PORT=3000 npm run dev`. The working directory is the caller's. A pane
+# with the same name already in the tab refuses; close it first. It prints
+# "<name>\t<block-id>".
 # list prints "<name>\t<running|exited N|unknown>\t<block-id>" for each side pane of
-# this worker in its current tab. close closes one named pane, or every one
-# with --all, and proves each gone (exit 3).
+# this worker in its current tab. close closes one named pane and proves it
+# gone (exit 3).
 #
 # A Rex window holds at most 64 panes by default (`rex server start --help`,
 # --max-panes); a split beyond it fails with Rex's own error.
 #
 # Exit status: 0 on success, 2 on a usage error, 1 on a refusal or a Rex
-# failure; open --wait exits with the command's status.
+# failure.
 set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-FM_REX_SIDE_RATIO_DEFAULT=35
+FM_REX_SIDE_RATIO=35
 
 usage() {
-  echo "usage: fm-rex-side.sh open <name> [--below|--right] [--ratio PCT] [--wait] -- <command...> | list | close <name> | close --all" >&2
+  echo "usage: fm-rex-side.sh open <name> -- <command...> | list | close <name>" >&2
   exit 2
 }
 
@@ -120,45 +118,23 @@ side_close_block() { # <block-id>
 }
 
 cmd_open() {
-  local name=${1:-} split=below ratio=$FM_REX_SIDE_RATIO_DEFAULT wait=0 panes bid pane_name state out
+  local name=${1:-} panes bid pane_name out
   name_ok "$name" || { echo "fm-rex-side: a side pane name is 1-32 letters, digits, dots, underscores, or dashes, starting with a letter or digit" >&2; usage; }
   shift
-  while [ "$#" -gt 0 ]; do
-    case "$1" in
-      --below) split=below ;;
-      --right) split=right ;;
-      --ratio)
-        [ "$#" -ge 2 ] || usage
-        ratio=$2
-        shift
-        ;;
-      --wait) wait=1 ;;
-      --) shift; break ;;
-      *) usage ;;
-    esac
-    shift
-  done
+  [ "${1:-}" = -- ] || usage
+  shift
   [ "$#" -gt 0 ] || { echo "fm-rex-side: open needs a command after --" >&2; usage; }
-  case "$ratio" in '' | *[!0-9]*) usage ;; esac
-  [ "$ratio" -ge 10 ] && [ "$ratio" -le 90 ] || { echo "fm-rex-side: --ratio must be 10..90" >&2; usage; }
   side_identity
   panes=$(side_panes) || exit 1
   while IFS=$'\t' read -r bid pane_name; do
     [ -n "$bid" ] && [ "$pane_name" = "$name" ] || continue
-    state=$(side_state "$bid")
-    case "$state" in
-      exited*) side_close_block "$bid" || die "could not close the exited side pane '$name' to replace it" ;;
-      running) die "side pane '$name' is still running; close it first (fm-rex-side.sh close $name)" ;;
-      *) die "the state of side pane '$name' could not be read; close it first (fm-rex-side.sh close $name)" ;;
-    esac
+    die "side pane '$name' is already open in this tab; close it first (fm-rex-side.sh close $name)"
   done <<<"$panes"
-  out=$(fm_backend_rex_cli_json split -s "$SIDE_SESSION" -b "$REX_BLOCK" --split "$split" --ratio "$ratio" \
+  out=$(fm_backend_rex_cli_json split -s "$SIDE_SESSION" -b "$REX_BLOCK" --split below --ratio "$FM_REX_SIDE_RATIO" \
     --focus=false --keep-open --label "$SIDE_PREFIX$name" -c "$PWD" --json -- "$@") || die "rex could not open side pane '$name'"
   bid=$(printf '%s' "$out" | jq -r '.block_ids[0] // empty' 2>/dev/null)
   case "$bid" in block:?*) ;; *) die "could not read the new side pane's id from: $out" ;; esac
   printf '%s\t%s\n' "$name" "$bid"
-  [ "$wait" -eq 1 ] || return 0
-  fm_backend_rex_cli wait "$bid" -s "$SIDE_SESSION" >/dev/null 2>&1
 }
 
 cmd_list() {
@@ -175,12 +151,12 @@ cmd_list() {
 cmd_close() {
   local target=${1:-} panes bid pane_name found=0 failed=0
   [ "$#" -eq 1 ] || usage
-  [ "$target" = --all ] || name_ok "$target" || usage
+  name_ok "$target" || usage
   side_identity
   panes=$(side_panes) || exit 1
   while IFS=$'\t' read -r bid pane_name; do
     [ -n "$bid" ] || continue
-    [ "$target" = --all ] || [ "$pane_name" = "$target" ] || continue
+    [ "$pane_name" = "$target" ] || continue
     found=1
     if side_close_block "$bid"; then
       printf 'closed\t%s\t%s\n' "$pane_name" "$bid"
@@ -189,7 +165,7 @@ cmd_close() {
       failed=1
     fi
   done <<<"$panes"
-  [ "$found" -eq 1 ] || [ "$target" = --all ] || die "no side pane named '$target' in this tab"
+  [ "$found" -eq 1 ] || die "no side pane named '$target' in this tab"
   [ "$failed" -eq 0 ]
 }
 

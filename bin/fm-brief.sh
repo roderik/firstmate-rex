@@ -669,7 +669,7 @@ REX_SIDE_HELPER=$(shell_quote "$FM_ROOT/bin/fm-rex-side.sh")
 # shellcheck disable=SC2016  # single quotes are deliberate: the backticks are literal Markdown code spans in the brief; only the '"$VAR"' break-out interpolates.
 REX_SECTION=$(printf '%s\n' \
 '# Rex side panes' \
-'If you run in your own Rex pane, `'"$REX_SIDE_HELPER"' open <name> -- <command...>` opens a labeled side pane in your tab for a test run, dev server, or validation progress without taking focus; `list` and `close <name>` manage them, and `--help` lists the options.' \
+'If you run in your own Rex pane, `'"$REX_SIDE_HELPER"' open <name> -- <command...>` opens a labeled side pane in your tab for a test run, dev server, or validation progress without taking focus; `list` and `close <name>` manage them.' \
 'Cleanup closes your side panes with your tab; outside a Rex pane the helper refuses and changes nothing.')
 HERDR_SECTION="$HERDR_SECTION"$'\n\n'"$REX_SECTION"
 fi
