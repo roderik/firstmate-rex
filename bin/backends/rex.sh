@@ -846,9 +846,10 @@ fm_backend_rex_endpoint_absence_recheck() { # <target>
 # fm_backend_rex_kill: close the task's block, then prove it gone (exit 3) and
 # retire this home's own session if that was its last tab. 0 = closed or
 # already gone; 1 = the block may still be live (unreachable server, a label
-# that no longer matches, or a close that did not take).
+# that no longer matches, or a close that did not take). The deliberate close
+# pre-commits the block's `dead` edge, so an armed watcher never escalates it.
 fm_backend_rex_kill() { # <target> [unused] [expected-label]
-  local target=$1 expected_label=${3:-}
+  local target=$1 expected_label=${3:-} dead_marker
   if ! fm_backend_rex_target_ready "$target" "$expected_label"; then
     case "$FM_BACKEND_REX_READY_RC" in
       3)
@@ -865,9 +866,12 @@ fm_backend_rex_kill() { # <target> [unused] [expected-label]
         ;;
     esac
   fi
+  dead_marker=$(fm_backend_rex_escalation_marker "${STATE:-$FM_HOME/state}" "$target" dead)
+  { : >"$dead_marker"; } 2>/dev/null || true
   FM_BACKEND_REX_TARGET_HINT=$target fm_backend_rex_cli block close -s "$FM_BACKEND_REX_SESSION_ID" "$FM_BACKEND_REX_BLOCK_ID" >/dev/null 2>&1 || true
   fm_backend_rex_block_inspect "$target" >/dev/null
   if [ "$?" -ne 3 ]; then
+    rm -f "$dead_marker" 2>/dev/null || true
     echo "error: the Rex block for $target is still present after close" >&2
     return 1
   fi

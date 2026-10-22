@@ -145,6 +145,7 @@ On Rex the watcher wakes on Rex events instead of only polling.
 
 - `program_status_changed` to `blocked` on the root record is an agent waiting on a human; it escalates at once, and a later `working` re-arms it.
 - `child_exited` or `block_closed` is a worker that exited or a pane that closed; it escalates at once instead of waiting for the liveness poll.
+  A tab Firstmate closes itself, such as at teardown, never escalates: the close records the `dead` edge as already handled first.
 - `idle` and `done` defer to the ordinary checks, and Firstmate's own records (`app=firstmate`, or any child `id`) are ignored.
 
 The stream replays nothing, so every subscribe pokes the session until a `client_connected` event proves it live and then reconciles each watched block by reading its current state.
@@ -153,7 +154,7 @@ Exit 4, a closed stream, or a failed subscribe returns to plain polling for that
 
 ## Busy and submit signals
 
-Claude Code publishes a root program status on Rex, proven by `tests/fm-rex-program-status-live-e2e.test.sh`, so for it `fm_backend_busy_state` reads `working` as busy (only while the agent process is alive) and `idle`, `done`, or `blocked` as idle.
+Claude Code publishes a root program status on Rex that leaves `working` once its turn ends, proven by `tests/fm-rex-program-status-live-e2e.test.sh`, so for it `fm_backend_busy_state` reads `working` as busy (only while the agent process is alive) and `idle`, `done`, or `blocked` as idle.
 A steer is confirmed submitted when the composer reads empty, or when the root status moves to `working` from a baseline that was not already working.
 `FM_BACKEND_REX_STATUS_APPS` lists the harnesses trusted this way; every other harness keeps capture and hash polling.
 

@@ -443,6 +443,11 @@ test_kill_closes_proves_gone_and_retires_the_home_session() {
   fm_backend_kill rex "$T" "" fm-t1 || fail "kill should succeed"
   calls | grep -q " block close -s session:$SID block:$BID" || fail "kill must close the exact block"
   calls | grep -q " kill session:$SID" || fail "an emptied fm-local session should be retired"
+  fm_backend_rex_apply_transition "$STATE" "$SID" "$(fm_transition_record "$BID" "$SID" "" dead "")" >/dev/null \
+    && fail "a block Firstmate closed itself must never escalate as dead"
+  fm_backend_clear_transition rex "$STATE" "$T"
+  fm_backend_rex_apply_transition "$STATE" "$SID" "$(fm_transition_record "$BID" "$SID" "" dead "")" >/dev/null \
+    || fail "clearing the transition must re-arm the dead edge"
 
   new_case kill-keep
   inspect_json "$BID" "$SID" "$(fm_backend_rex_scoped_name fm-t1)"
@@ -473,7 +478,9 @@ test_kill_closes_proves_gone_and_retires_the_home_session() {
   inspect_json "$BID" "$SID" "$(fm_backend_rex_scoped_name fm-t1)"
   out=$(fm_backend_kill rex "$T" "" fm-t1 2>&1) && fail "a block still present after close must fail"
   assert_contains "$out" "still present" "the stuck-close refusal should say so"
-  pass "rex: kill closes the exact block, proves exit 3, retires only this home's emptied session, and refuses blind outcomes"
+  fm_backend_rex_apply_transition "$STATE" "$SID" "$(fm_transition_record "$BID" "$SID" "" dead "")" >/dev/null \
+    || fail "a close that did not take must leave the block's dead edge armed"
+  pass "rex: kill closes the exact block, proves exit 3, pre-commits its dead edge, retires only this home's emptied session, and refuses blind outcomes"
 }
 
 test_list_live_filters_by_home_scope() {

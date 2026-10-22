@@ -9,8 +9,10 @@
 # silently; a run that exercised no harness fails rather than passing vacuously.
 # Claude Code is the one harness whose program status drives busy_state and
 # submit confirmation (FM_BACKEND_REX_STATUS_APPS), so the guard fails naming
-# its version if Claude stops publishing `working`. Other harnesses are evidence
-# for docs/verification/runtime-backends.md, never a failure.
+# its version if Claude stops publishing `working`, or if its root record still
+# reads `working` once the worker has reported done and its turn has ended.
+# Other harnesses are evidence for docs/verification/runtime-backends.md, never
+# a failure.
 set -u
 
 # shellcheck source=tests/lib.sh
@@ -89,6 +91,7 @@ HARNESSES=${FM_REX_STATUS_HARNESSES:-claude codex opencode pi grok kimi cursor o
 EXERCISED=0
 REPORT=
 CLAUDE_WORKING=skip
+CLAUDE_TURN_END=skip
 n=0
 for harness in $HARNESSES; do
   n=$((n + 1))
@@ -147,6 +150,20 @@ info - $harness ($version): root program states [${seen:-none}] finished=$finish
       *':working,'*) CLAUDE_WORKING=yes ;;
       *) CLAUDE_WORKING="no ($version)" ;;
     esac
+    CLAUDE_TURN_END="unproven, the probe did not finish ($version)"
+    if [ "$finished" = yes ]; then
+      CLAUDE_TURN_END="still working ($version)"
+      for _ in $(seq 1 30); do
+        rec=$(fm_backend_rex_root_status "$target") || { sleep 2; continue; }
+        if [ "${rec%%$'\t'*}" != working ]; then
+          CLAUDE_TURN_END=yes
+          break
+        fi
+        sleep 2
+      done
+    fi
+    REPORT="$REPORT
+info - $harness ($version): root record leaves working after the turn: $CLAUDE_TURN_END"
   fi
   teardown_task
 done
@@ -159,4 +176,9 @@ case "$CLAUDE_WORKING" in
   yes) pass "Claude Code still publishes a root working program status on Rex" ;;
   skip) pass "program-status evidence recorded for $EXERCISED harness(es); Claude Code not in this run" ;;
   *) fail "Claude Code stopped publishing a root working program status on Rex: $CLAUDE_WORKING; busy_state and submit confirmation depend on it" ;;
+esac
+case "$CLAUDE_TURN_END" in
+  yes) pass "Claude Code's root program status leaves working once its turn ends" ;;
+  skip) ;;
+  *) fail "Claude Code's root program status did not leave working after its turn: $CLAUDE_TURN_END; busy_state would read an idle pane as busy" ;;
 esac

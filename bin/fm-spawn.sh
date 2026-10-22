@@ -4236,7 +4236,7 @@ if [ "$RELAUNCH" -eq 1 ]; then
     # names while it is still live, else in this home's ordinary session there.
     fm_backend_rex_container_ensure || exit 1
     if [ -n "$DISPLAY_TITLE" ] || [ -z "${FM_REX_TASK_TAB_LABEL:-}" ]; then
-      FM_REX_TASK_TAB_LABEL=$(fm_backend_rex_tab_label "$KIND" "$ID" "$DISPLAY_TITLE")
+      FM_REX_TASK_TAB_LABEL=$(fm_backend_rex_tab_label "$KIND" "$ID" "$DISPLAY_TITLE" "${FM_BACKLOG_ROW_TITLE:-}")
     fi
     REX_TASK_IDS=$(fm_backend_rex_create_task "$W" "$WT" "" "$FM_REX_TASK_SESSION_ID" "$FM_REX_TASK_TAB_LABEL") || exit 1
     read -r FM_REX_TASK_SESSION_ID FM_REX_TASK_WINDOW_ID FM_REX_TASK_BLOCK_ID <<EOF
