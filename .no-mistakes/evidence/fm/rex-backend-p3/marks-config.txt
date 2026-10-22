@@ -1,0 +1,13 @@
+## config/rex-status-marks: absent(on) / off / removed 'labels' value
+== config absent (default on)
+record: blocked|auth|Blocked: needs GITHUB_TOKEN login to continue
+tabs: Scout · Claude…
+== config off
+record: clear||
+cache: none
+== config 'labels' (removed channel)
+warning: rex status marks: /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.90GTGf/config/rex-status-marks: unknown value; using on (on or off)
+record: blocked|auth|Blocked: needs GITHUB_TOKEN login to continue
+tabs: Scout · Claude…
+== second sync with 'labels' (warn once per value)
+(end)

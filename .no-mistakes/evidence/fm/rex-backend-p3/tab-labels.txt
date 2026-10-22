@@ -1,0 +1,9 @@
+## Scenario A: auto label from backlog title
+backlog title: - [ ] lbl-auto - Rex-native attention: tab badges, session picker, and Dock badge for workers (phase 3) (kind: scout) (since 2026-10-22)
+rex_tab_label=Scout · tab badges
+{"session_label":"fm-local","tabs":[{"tab":"Scout · tab badges","blocks":["fm-firstmate-e296321e-lbl-auto"]}]}
+
+## Scenario B: explicit --title "Marks probe" -> tab 'Marks probe'
+## Scenario C: relaunch of live tab with --title 'Renamed after relaunch with a very long display title' -> 'Renamed after relaunch…' (23 chars)
+## Scenario D: block closed, relaunch without --title; lbl-auto had rex_tab_label stripped (pre-change record) -> 'Scout · tab badges' from backlog; lbl-title kept recorded label
+{"session":"fm-local","tabs":[{"tab":"Scout · tab badges","blocks":["fm-firstmate-e296321e-lbl-auto"]},{"tab":"Renamed after relaunch…","blocks":["fm-firstmate-e296321e-lbl-title"]}]}

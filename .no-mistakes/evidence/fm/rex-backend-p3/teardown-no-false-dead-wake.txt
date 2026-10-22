@@ -1,0 +1,40 @@
+## Adversarial: teardown of a live Rex worker while bin/fm-watch.sh is armed must not fire a false 'pane closed' dead wake
+(FM_SIGNAL_GRACE=2 so the worker's own earlier turn-end signal is drained before arming; rounds 1-2 without it leaked that pre-teardown turn-end signal into the armed window, never a dead wake)
+spawned tear-three harness=claude kind=scout window=01a162d0-cf0b-779d-b8f8-70e52b3ca70f:01a162d0-cf0b-7989-9db3-28298b40a36e worktree=/Users/roderik/.treehouse/probe-59f1c0/1/probe
+complete: tear-three captain-call inventory reviewed
+quiet-pass 1 rc=0 signal: /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.90GTGf/state/tear-three.turn-ended
+quiet-pass 2 rc=124 
+quiet-pass 3 rc=124 
+task window 01a162d0-cf0b-779d-b8f8-70e52b3ca70f:01a162d0-cf0b-7989-9db3-28298b40a36e
+teardown start 1792659348.236547000
+teardown: reaping leaked worktree process(es) for tear-three: 51338 57179 58224 58238 58247 60291
+teardown: force-killing leaked worktree process(es) for tear-three: 51338
+teardown tear-three complete (window 01a162d0-cf0b-779d-b8f8-70e52b3ca70f:01a162d0-cf0b-7989-9db3-28298b40a36e, worktree /Users/roderik/.treehouse/probe-59f1c0/1/probe)
+teardown end 1792659377.343187000
+--- armed watcher output across teardown:
+/Users/roderik/.no-mistakes/worktrees/42de5badf924/01M5HA91W61BRP1NTK126MGZCV/bin/fm-wake-lib.sh: line 593: 62264 Terminated: 15          sleep "$POLL"
+rc=124 end=1792659390.511258000
+--- queue:
+--- triage:
+[2026-10-22T10:55:43+0200] absorbed non-terminal stale timer reset: 01a162d0-cf0b-779d-b8f8-70e52b3ca70f:01a162d0-cf0b-7989-9db3-28298b40a36e
+--- leftover markers:
+none
+
+## Round 1 (default grace) for reference
+spawned tear-one harness=claude kind=scout window=01a162cb-18a4-7db7-8c3b-b4b60d2e7300:01a162cb-18a4-7ecd-ae39-f9801ff098b1 worktree=/Users/roderik/.treehouse/probe-59f1c0/1/probe
+complete: tear-one captain-call inventory reviewed
+quiet-pass 1 rc=124 /Users/roderik/.no-mistakes/worktrees/42de5badf924/01M5HA91W61BRP1NTK126MGZCV/bin/fm-wake-lib.sh: line 593: 76291 Terminated: 15          sleep "$SIGNAL_GRACE"
+task window 01a162cb-18a4-7db7-8c3b-b4b60d2e7300:01a162cb-18a4-7ecd-ae39-f9801ff098b1
+teardown start 1792658956.053493000
+teardown: reaping leaked worktree process(es) for tear-one: 39834 45723 46187 46190 46191 47429
+teardown: force-killing leaked worktree process(es) for tear-one: 39834
+teardown tear-one complete (window 01a162cb-18a4-7db7-8c3b-b4b60d2e7300:01a162cb-18a4-7ecd-ae39-f9801ff098b1, worktree /Users/roderik/.treehouse/probe-59f1c0/1/probe)
+teardown end 1792658980.027238000
+--- armed watcher output across teardown:
+signal: /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.90GTGf/state/tear-one.turn-ended
+rc=0 end=1792658981.120430000
+--- queue:
+signal	tear-one.turn-ended	signal: /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.90GTGf/state/tear-one.turn-ended
+--- triage:
+--- leftover markers:
+.seen-tear-one_turn-ended

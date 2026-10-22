@@ -1,0 +1,34 @@
+ok - rex: every call carries a clean env, the pinned -S server, --autostart=false, and full typed ids
+ok - rex: server resolution - spawn pin, then the task record, then FM_REX_SERVER/REX_SERVER, then the running default
+ok - rex: the version gate checks the server API floor and methods and refuses an unreachable server
+ok - rex: container_ensure pins the server and records its instance id
+ok - rex: a primary-home task opens in the fm-local session (created with the task as its first tab), unfocused and kept open
+ok - rex: create_task adopts a unique home session, refuses two, and refuses a duplicate or unreadable inventory
+ok - rex: inside a proven Rex pane, task tabs open in fm-local and never in the supervisor's own session
+ok - rex: targets are exactly <session-uuid>:<block-uuid>
+ok - rex: target_ready verifies session, label, and separates gone (3) from unreachable (4)
+ok - rex: capture tails without CR, text rides stdin, keys normalize, and unknown keys refuse
+ok - rex: the styled composer capture feeds the shared classifier and the shared submit core
+ok - rex: agent_state maps agent/shell/other foregrounds, last_exit, exit 3, and exit 4
+ok - rex: absence is proven by exit 3 from the recorded server and never by an unreachable one
+ok - rex: kill closes the exact block, proves exit 3, pre-commits its dead edge, retires only this home's emptied session, and refuses blind outcomes
+ok - rex: list_live lists only this home's scoped blocks
+ok - rex: detection stays innermost-first and needs live-block, session, and ancestry proof; config selects it explicitly
+ok - rex: cleanup identity requires the server, both uuids, and window=<session>:<block>
+ok - rex: a secondmate gets a new fm-<id> session whose first tab is its pane, never the parent's nor an unrecorded one
+ok - rex: a secondmate's own workers open as further tabs of its fm-<id> session
+ok - rex: a secondmate relaunch reuses its live recorded session (tab moved first), never a relabeled one, and refuses an unreadable one
+ok - rex: a reclaim mints its tab in the recorded session while live and labeled, else in this home's session
+ok - rex: an emptied secondmate session retires with that secondmate only, and a detached block keeps any session alive
+ok - rex: a secondmate home scopes its workers' labels and its session label by its own tag
+ok - rex: supervisor discovery takes a Rex pane only with ancestry proof, after tmux and herdr
+ok - rex: a detached daemon block is created in the captain's session and closes only on proven exit 3
+ok - rex: /afk runs the daemon in a recorded detached block on the captain's server and closes it by exact id
+ok - rex: the remote host control routes to fm-<id>, reads a gone block as missing, and refuses inconsistent or cross-backend records
+ok - rex: tab labels are sidebar sized - explicit title, else a condensed backlog title, else the id, under a kind marker
+ok - rex: a mark is one id=fm program-status record (optionally with one OSC 777 notification), cleared alone, never on a foreign block
+ok - rex: mark_read reports only Firstmate's record and fails on an unreadable pane; tab rename renames only on change
+ok - rex: busy_state trusts only a proven harness's own root record, and busy also needs a live agent
+ok - rex: submit confirmation accepts a proven harness's not-working -> working edge and nothing else
+ok - rex: the event wait escalates a watched root blocked or dead edge once, ignores Firstmate's own marks, reconciles on subscribe, and treats exit 4 as unusable
+ok - rex: the marks producer plans from status, writes once, repairs without re-notifying, clears on resolve, and honors off

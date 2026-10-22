@@ -1,0 +1,12 @@
+ok - rex smoke: the private server passes the version gate and its instance is recorded
+ok - rex smoke: one fm-local session holding exactly the task tabs, unfocused labeled tabs, and duplicate refusal
+ok - rex smoke: current_path is the live foreground cwd and an idle shell reads dead
+ok - rex smoke: text rides stdin literally and submits with Enter
+ok - rex smoke: agent_state reads real foreground processes (shell dead, other ambiguous, harness-named alive)
+ok - rex smoke: capture includes scrollback (83 lines, 24 rows), so rex stays out of the viewport-capture list
+ok - rex smoke: list_live finds this home's tabs
+ok - rex smoke: a mark is an invisible id=fm record plus a streamed desktop notification ({"title":"Firstmate: smoke","body":"Needs your decision"}), cleared alone; a tab rename takes
+ok - rex smoke: the event wait returns a real blocked report and a real exit as dead, and an unreachable server is unusable, never dead
+ok - rex smoke: kill proves exit 3 and retires the emptied home session only after its last tab
+ok - rex smoke: a secondmate pane is the first tab of its fm-<id> session and its own worker joins that session
+ok - rex smoke: an unreachable server is exit 4 and unreadable, and nothing autostarts

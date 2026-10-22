@@ -1,0 +1,5 @@
+## Scenario: needs-decision status -> Rex attention mark via bin/fm-rex-marks.sh sync
+status line: needs-decision [at=1792658115]: pick merge strategy for the Rex marks branch
+--- rex events (program_status_changed / desktop_notification) for the worker block, across two syncs:
+{"name":"program_status_changed","payload":{"id":"fm","record":{"id":"fm","state":"blocked","kind":"question","app":"firstmate","effective_app":"firstmate","msg":"Needs your decision: pick merge strategy for the Rex marks branch","updated_at":"2026-10-22T10:35:15.995432+02:00","owner":{"pid":97512,"name":"2.1.308"}},"reason":"report"}}
+{"name":"desktop_notification","payload":{"title":"Firstmate: Scout · tab badges","body":"Needs your decision: pick merge strategy for the Rex marks branch"}}

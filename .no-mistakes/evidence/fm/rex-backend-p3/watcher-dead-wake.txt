@@ -1,0 +1,7 @@
+## Scenario: worker tab closed out-of-band while the task record exists -> watcher wakes as dead
+lbl-auto window=01a162c1-ca8d-7d27-9d9e-c52df519ce86:01a162c1-ca8d-7dcf-a2c1-d4f2150b0e68
+--- bin/fm-watch.sh output (re-armed after the close; subscribe-time reconcile):
+stale: 01a162c1-ca8d-7d27-9d9e-c52df519ce86:01a162c1-ca8d-7dcf-a2c1-d4f2150b0e68 (rex: agent exited or pane closed - escalated immediately, not via liveness poll)
+rc=0 after=6s
+--- dedupe markers:
+.rex-escalated-01a162c1-ca8d-7d27-9d9e-c52df519ce86_01a162c1-ca8d-7dcf-a2c1-d4f2150b0e68.dead

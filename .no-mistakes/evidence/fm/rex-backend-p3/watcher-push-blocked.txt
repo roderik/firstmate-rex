@@ -1,0 +1,10 @@
+## Scenario: watcher armed on the Rex event stream wakes on a real in-pane blocked report (POLL=15s)
+trigger at 1792658713.396422000
+--- bin/fm-watch.sh output:
+stale: 01a162c1-ca8d-7d27-9d9e-c52df519ce86:01a162c2-070d-766c-a4d1-f88480af131f (rex: agent blocked - waiting on human, escalated immediately, not via wedge timer)
+rc=0 end=1792658715.479070000
+--- triage log tail:
+
+## Earlier run: a blocked record left in the pane while the watcher was down is caught by the subscribe-time reconcile on re-arm:
+stale: 01a162c1-ca8d-7d27-9d9e-c52df519ce86:01a162c2-070d-766c-a4d1-f88480af131f (rex: agent blocked - waiting on human, escalated immediately, not via wedge timer)
+rc=0 end=1792658654.611497000

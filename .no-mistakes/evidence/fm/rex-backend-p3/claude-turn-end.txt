@@ -1,0 +1,6 @@
+## Claude Code root program status across one real turn (busy_state source)
+spawned turn-probe harness=claude kind=scout window=01a162d3-efdc-70a7-9ffd-d4e92c868a7f:01a162d3-efdc-71bd-9c19-a624bb58804f worktree=/Users/roderik/.treehouse/probe-59f1c0/1/probe
+t+1s root=working busy=busy
+t+19s root=done busy=idle
+t+19s turn ended; final root=done busy=idle
+{"app":"claude-code","state":"done","version":"2.1.308"}
