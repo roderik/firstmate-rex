@@ -47,8 +47,9 @@ A session label is display and an identity check, never routing:
 - A primary-home task never opens in Firstmate's own session; if that session is itself labeled `fm-local`, the spawn refuses.
 
 Tabs open with `--focus=false`, so a spawn never moves the captain's view.
-The tab label is short enough for the Rex sidebar: a kind marker (`Ship`, `Scout`, or `Mate`) and a few words, at most 24 visible characters, for example `Ship · Rex-native status`.
-It comes from `fm-spawn.sh --title <text>` verbatim, else the backlog item's title condensed to its first clause, else the task id, and is recorded as `rex_tab_label=`.
+The tab label is short enough for the Rex sidebar, at most 24 visible characters and clipped with an ellipsis beyond that.
+An explicit `fm-spawn.sh --title <text>` is used as given; otherwise the label is a kind marker (`Ship`, `Scout`, or `Mate`) plus the backlog item's title condensed to its first clause, else the task id, for example `Ship · Rex-native status`.
+The label is recorded as `rex_tab_label=`.
 A relaunch keeps the recorded label unless it passes a new `--title`.
 The block label `fm-<home-label>-<id>` stays the identity cross-check; it is home-scoped so two homes sharing one server never cross-match.
 
