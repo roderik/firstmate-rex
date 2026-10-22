@@ -22,11 +22,9 @@
 # notification titled with the tab label; a repair of a dropped record does
 # not notify again.
 #
-# config/rex-status-marks (local, gitignored) selects the channel; its first
-# non-comment word is `on` (also when the file is absent), `off`, or `labels`.
-# `labels` writes nothing to any tty: the tab label gains a "⚑ " prefix
-# instead, and no notification is sent. An unrecognized word warns once per
-# value and reads as on.
+# config/rex-status-marks (local, gitignored) turns the marks on or off; its
+# first non-comment word is `on` (also when the file is absent) or `off`. An
+# unrecognized word warns once per value and reads as on.
 #
 # Producers:
 #   bin/fm-watch.sh     sync, once per poll cycle while this home records a
@@ -40,12 +38,11 @@
 #
 # plan prints "<task>\t<state>\t<kind>\t<msg>" per recorded rex task without
 # contacting Rex. sync keeps a per-task cache, state/.rex-mark-<task>, holding
-# "<channel>\t<state>\t<kind>\t<msg>" of the last mark it wrote. A task whose
-# planned and cached marks are both clear costs no Rex call; otherwise sync
-# reads the live record (or tab label) and writes only when it differs, so a
-# record Rex dropped at a prompt mark or process exit is repaired on the next
-# cycle. A changed channel first undoes the old channel's mark. clear undoes
-# both channels on the task's pane and removes its cache.
+# "<state>\t<kind>\t<msg>" of the last mark it wrote. A task whose planned and
+# cached marks are both clear costs no Rex call; otherwise sync reads the live
+# record and writes only when it differs, so a record Rex dropped at a prompt
+# mark or process exit is repaired on the next cycle. Turning the marks off
+# clears every cached mark. clear removes the task's mark and its cache.
 #
 # Environment: FM_HOME, FM_STATE_OVERRIDE, and FM_CONFIG_OVERRIDE resolve the
 # home exactly as the other bin/ scripts do.
@@ -82,7 +79,7 @@ task_ok() {
   [ "${#1}" -le 64 ]
 }
 
-# channel: on, off, or labels from config/rex-status-marks.
+# channel: on or off from config/rex-status-marks.
 channel() {
   local file="$CONFIG/$FM_REX_MARKS_CONFIG" line word marker
   [ -f "$file" ] || {
@@ -94,7 +91,7 @@ channel() {
     case "$line" in '' | '#'*) continue ;; esac
     word=$(printf '%s' "${line%%[[:space:]]*}" | tr '[:upper:]' '[:lower:]')
     case "$word" in
-      on | off | labels)
+      on | off)
         printf '%s' "$word"
         return 0
         ;;
@@ -102,7 +99,7 @@ channel() {
     case "$word" in *[!a-z0-9_-]*) word=invalid ;; esac
     marker="$STATE/$FM_REX_MARKS_UNKNOWN_PREFIX$word"
     if [ ! -e "$marker" ]; then
-      warn "$file: unknown value; using on (on, off, or labels)"
+      warn "$file: unknown value; using on (on or off)"
       : >"$marker" 2>/dev/null || true
     fi
     break
@@ -200,18 +197,9 @@ collect_tasks() { # [<task>]
 
 cache_path() { printf '%s/%s%s' "$STATE" "$FM_REX_MARKS_CACHE_PREFIX" "$1"; }
 
-# undo <channel> <task> <target> <tab-label>: remove one channel's mark.
-undo() {
-  case "$1" in
-    on) fm_backend_rex_mark "$3" clear "" "" "fm-$2" ;;
-    labels) fm_backend_rex_label_flag "$3" off "$4" "fm-$2" ;;
-    *) return 0 ;;
-  esac
-}
-
 # sync_task <channel> <record>: converge one task's mark; 1 on a failed write.
 sync_task() {
-  local mode=$1 task kind target tab cache cached='' c_mode c_state c_kind c_msg live want notify=
+  local mode=$1 task kind target tab cache cached='' c_state c_kind c_msg live want notify=
   IFS=$'\t' read -r task kind target tab <<EOF
 $2
 EOF
@@ -220,49 +208,34 @@ EOF
   [ ! -f "$cache" ] || cached=$(head -1 "$cache" 2>/dev/null)
   # cut, not `IFS=$'\t' read`: a tab is IFS whitespace, so read would collapse
   # an empty kind and shift the message into its place.
-  c_mode=$(printf '%s' "$cached" | cut -f1)
-  c_state=$(printf '%s' "$cached" | cut -f2)
-  c_kind=$(printf '%s' "$cached" | cut -f3)
-  c_msg=$(printf '%s' "$cached" | cut -f4)
-  [ -n "$c_mode" ] || c_state=clear
+  c_state=$(printf '%s' "$cached" | cut -f1)
+  c_kind=$(printf '%s' "$cached" | cut -f2)
+  c_msg=$(printf '%s' "$cached" | cut -f3)
+  [ -n "$c_state" ] || c_state=clear
   if [ "$mode" = off ] || [ "$P_STATE" = clear ]; then
-    if [ -z "$cached" ] || [ "$c_state" = clear ]; then
+    if [ "$c_state" = clear ]; then
       rm -f "$cache"
       return 0
     fi
   fi
   load_backend || return 1
-  if [ -n "$c_mode" ] && [ "$c_mode" != "$mode" ] && [ "$c_state" != clear ]; then
-    undo "$c_mode" "$task" "$target" "$tab" || return 1
-    c_state=clear
-  fi
   if [ "$mode" = off ]; then
+    fm_backend_rex_mark "$target" clear "" "" "fm-$task" || return 1
     rm -f "$cache"
     return 0
   fi
   want="$P_STATE"$'\t'"$P_KIND"$'\t'"$P_MSG"
-  case "$mode" in
-    on)
-      live=$(fm_backend_rex_mark_read "$target") || return 1
-      if [ "$live" != "$want" ]; then
-        if [ "$P_STATE" != clear ] && [ "$P_STATE $P_KIND $P_MSG" != "$c_state $c_kind $c_msg" ]; then
-          notify="Firstmate: ${tab:-$task}"
-        fi
-        fm_backend_rex_mark "$target" "$P_STATE" "$P_KIND" "$P_MSG" "fm-$task" "$notify" || return 1
-      fi
-      ;;
-    labels)
-      if [ "$P_STATE" = clear ]; then
-        fm_backend_rex_label_flag "$target" off "$tab" "fm-$task" || return 1
-      else
-        fm_backend_rex_label_flag "$target" on "$tab" "fm-$task" || return 1
-      fi
-      ;;
-  esac
+  live=$(fm_backend_rex_mark_read "$target") || return 1
+  if [ "$live" != "$want" ]; then
+    if [ "$P_STATE" != clear ] && [ "$P_STATE $P_KIND $P_MSG" != "$c_state $c_kind $c_msg" ]; then
+      notify="Firstmate: ${tab:-$task}"
+    fi
+    fm_backend_rex_mark "$target" "$P_STATE" "$P_KIND" "$P_MSG" "fm-$task" "$notify" || return 1
+  fi
   if [ "$P_STATE" = clear ]; then
     rm -f "$cache"
   else
-    printf '%s\t%s\n' "$mode" "$want" >"$cache" 2>/dev/null || return 1
+    printf '%s\n' "$want" >"$cache" 2>/dev/null || return 1
   fi
   return 0
 }
@@ -298,17 +271,16 @@ cmd_sync() {
 }
 
 cmd_clear() {
-  local record task target tab rc=0
+  local record task target rc=0
   task_ok "${1:-}" || usage
   collect_tasks "$1"
   for record in ${TASKS[@]+"${TASKS[@]}"}; do
-    IFS=$'\t' read -r task _ target tab <<EOF
+    IFS=$'\t' read -r task _ target _ <<EOF
 $record
 EOF
     if [ -f "$(cache_path "$task")" ]; then
       load_backend || return 1
-      undo on "$task" "$target" "$tab" || rc=1
-      undo labels "$task" "$target" "$tab" || rc=1
+      fm_backend_rex_mark "$target" clear "" "" "fm-$task" || rc=1
     fi
   done
   rm -f "$(cache_path "$1")"

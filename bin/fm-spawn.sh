@@ -4227,7 +4227,7 @@ if [ "$RELAUNCH" -eq 1 ]; then
     # never stops the relaunch.
     if [ "$BACKEND" = rex ] && [ -n "$DISPLAY_TITLE" ]; then
       FM_REX_TASK_TAB_LABEL=$(fm_backend_rex_tab_label "$KIND" "$ID" "$DISPLAY_TITLE")
-      fm_backend_rex_label_flag "$T" off "$FM_REX_TASK_TAB_LABEL" "$W" >/dev/null 2>&1 || true
+      fm_backend_rex_tab_rename "$T" "$FM_REX_TASK_TAB_LABEL" "$W" >/dev/null 2>&1 || true
     fi
   elif [ "$BACKEND" = rex ]; then
     # The recorded Rex block is PROVEN gone (the relaunch gate above owns that

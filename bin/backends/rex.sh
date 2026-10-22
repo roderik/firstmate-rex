@@ -1076,23 +1076,17 @@ fm_backend_rex_mark_read() { # <target>
     | if $r == null then "clear\t\t" else "\($r.state // "")\t\($r.kind // "")\t\($r.msg // "")" end' 2>/dev/null
 }
 
-# fm_backend_rex_label_flag: the `labels` fallback (no tty write). Sets the
-# task tab's label to "⚑ <base>" when <flag> is on and to <base> when off,
-# renaming only when the live label differs. <base> defaults to the live
-# label without the flag.
-FM_BACKEND_REX_FLAG_PREFIX='⚑ '
-fm_backend_rex_label_flag() { # <target> <on|off> [base-label] [expected-label]
-  local target=$1 flag=$2 base=${3:-} out wid view live want
-  fm_backend_rex_target_ready "$target" "${4:-}" || return 1
+# fm_backend_rex_tab_rename: set the task tab's label to <label>, renaming
+# only when the live label differs.
+fm_backend_rex_tab_rename() { # <target> <label> [expected-label]
+  local target=$1 want=$2 out wid view live
+  [ -n "$want" ] || return 1
+  fm_backend_rex_target_ready "$target" "${3:-}" || return 1
   out=$(fm_backend_rex_block_inspect "$target") || return 1
   wid=$(printf '%s' "$out" | jq -r '.block.window_id // empty' 2>/dev/null)
   [ -n "$wid" ] || return 1
   view=$(FM_BACKEND_REX_TARGET_HINT=$target fm_backend_rex_cli window ls -s "$FM_BACKEND_REX_SESSION_ID" --json 2>/dev/null) || return 1
   live=$(printf '%s' "$view" | jq -r --arg w "$wid" '.windows[]? | select(.window_id == $w) | .label // empty' 2>/dev/null)
-  [ -n "$base" ] || base=${live#"$FM_BACKEND_REX_FLAG_PREFIX"}
-  [ -n "$base" ] || return 1
-  want=$base
-  [ "$flag" != on ] || want="$FM_BACKEND_REX_FLAG_PREFIX$base"
   [ "$live" != "$want" ] || return 0
   FM_BACKEND_REX_TARGET_HINT=$target fm_backend_rex_cli window rename -s "$FM_BACKEND_REX_SESSION_ID" "$wid" "$want" >/dev/null 2>&1
 }

@@ -522,7 +522,7 @@ Use the explicit guarded cleanup path described in [`docs/herdr-backend.md`](her
 
 ### Rex attention marks
 
-The local `config/rex-status-marks` file chooses how a Rex worker that needs the captain shows up in Rex: `on` (the default when absent) sets a program-status badge and a notification on the worker's pane, `labels` prefixes its tab label instead, and `off` shows neither.
+The local `config/rex-status-marks` file chooses how a Rex worker that needs the captain shows up in Rex: `on` (the default when absent) sets a program-status badge and a notification on the worker's pane, and `off` shows neither.
 [Attention marks](rex-backend.md#attention-marks) owns the status mapping and its limits.
 
 ### Zellij sessions

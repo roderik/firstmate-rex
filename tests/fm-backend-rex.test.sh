@@ -888,7 +888,7 @@ test_mark_is_one_status_record_plus_optional_notification() {
   pass "rex: a mark is one id=fm program-status record (optionally with one OSC 777 notification), cleared alone, never on a foreign block"
 }
 
-test_mark_read_and_label_flag() {
+test_mark_read_and_tab_rename() {
   local out
   mark_case mark-read
   printf '{"records":[{"state":"working","app":"claude-code"},{"id":"fm","state":"blocked","kind":"question","app":"firstmate","msg":"Needs it"}]}' \
@@ -900,15 +900,14 @@ test_mark_read_and_label_flag() {
   rm -f "$FAKE/call/block_$BID.program_status.json"
   fm_backend_rex_mark_read "$T" >/dev/null && fail "an unreadable pane must fail, never read as clear"
   printf '{"windows":[{"window_id":"window:%s","label":"P3 · Rex"}]}' "$WID" >"$FAKE/window-ls.json"
-  fm_backend_rex_label_flag "$T" on "" fm-t1 || fail "label flag on failed"
-  calls | grep -q " window rename -s session:$SID window:$WID ⚑ P3 · Rex" || fail "flag on must prefix the tab label: $(calls)"
+  fm_backend_rex_tab_rename "$T" "Ship · New title" fm-t1 || fail "tab rename failed"
+  calls | grep -q " window rename -s session:$SID window:$WID Ship · New title" || fail "rename must set the tab label: $(calls)"
   : >"$FAKE/log"
-  fm_backend_rex_label_flag "$T" off "" fm-t1 || fail "label flag off failed"
-  calls | grep -q " window rename " && fail "an unflagged label that already matches must not be renamed"
-  printf '{"windows":[{"window_id":"window:%s","label":"⚑ P3 · Rex"}]}' "$WID" >"$FAKE/window-ls.json"
-  fm_backend_rex_label_flag "$T" off "" fm-t1 || fail "label flag off failed"
-  calls | grep -q " window rename -s session:$SID window:$WID P3 · Rex" || fail "flag off must restore the base label: $(calls)"
-  pass "rex: mark_read reports only Firstmate's record and fails on an unreadable pane; the labels fallback renames only on change"
+  fm_backend_rex_tab_rename "$T" "P3 · Rex" fm-t1 || fail "tab rename failed"
+  calls | grep -q " window rename " && fail "a label that already matches must not be renamed"
+  fm_backend_rex_tab_rename "$T" "Ship · x" fm-other && fail "a block carrying another task's label must not be renamed"
+  calls | grep -q " window rename " && fail "a refused rename must not rename"
+  pass "rex: mark_read reports only Firstmate's record and fails on an unreadable pane; tab rename renames only on change"
 }
 
 test_busy_state_trusts_only_proven_program_status() {
@@ -1061,20 +1060,26 @@ test_marks_producer_converges_and_notifies_once() {
   assert_contains "$out" $'error\t\tFailed: build broke' "failed plans an error mark"
 
   marks_status t1 "needs-decision [at=1700000500] [key=k2]: second call"
-  printf 'labels\n' >"$FM_HOME/config/rex-status-marks"
-  printf '{"windows":[{"window_id":"window:%s","label":"P3 · Rex"}]}' "$WID" >"$FAKE/window-ls.json"
+  printf '{"records":[]}' >"$FAKE/call/block_$BID.program_status.json"
+  : >"$tty"
+  FM_STATE_OVERRIDE=$STATE "$ROOT/bin/fm-rex-marks.sh" sync || fail "sync failed"
+  grep -q 'id=fm:msg=' "$tty" || fail "sync must write the second mark"
+  [ -e "$STATE/.rex-mark-t1" ] || fail "a written mark must be cached"
+  printf 'off\n' >"$FM_HOME/config/rex-status-marks"
+  : >"$tty"
+  FM_STATE_OVERRIDE=$STATE "$ROOT/bin/fm-rex-marks.sh" sync || fail "off sync failed"
+  grep -q 'state=clear:app=firstmate:id=fm' "$tty" || fail "turning marks off must clear the shown mark: $(od -c "$tty" | head -3)"
+  [ ! -e "$STATE/.rex-mark-t1" ] || fail "off must drop the cache"
   : >"$tty"
   : >"$FAKE/log"
-  FM_STATE_OVERRIDE=$STATE "$ROOT/bin/fm-rex-marks.sh" sync || fail "labels sync failed"
-  calls | grep -q " window rename -s session:$SID window:$WID ⚑ P3 · Rex" || fail "labels mode must flag the tab: $(calls)"
-  [ ! -s "$tty" ] || fail "labels mode must never write to the tty"
-  printf 'off\n' >"$FM_HOME/config/rex-status-marks"
-  printf '{"windows":[{"window_id":"window:%s","label":"⚑ P3 · Rex"}]}' "$WID" >"$FAKE/window-ls.json"
-  : >"$FAKE/log"
   FM_STATE_OVERRIDE=$STATE "$ROOT/bin/fm-rex-marks.sh" sync || fail "off sync failed"
-  calls | grep -q " window rename -s session:$SID window:$WID P3 · Rex" || fail "turning marks off must undo the labels flag: $(calls)"
-  [ ! -e "$STATE/.rex-mark-t1" ] || fail "off must drop the cache"
-  pass "rex: the marks producer plans from status, writes once, repairs without re-notifying, clears on resolve, and honors labels and off"
+  [ ! -s "$tty" ] || fail "off with no cached mark must write nothing"
+  calls | grep -q 'program_status' && fail "off with no cached mark must cost no Rex call"
+  printf 'labels\n' >"$FM_HOME/config/rex-status-marks"
+  out=$(FM_STATE_OVERRIDE=$STATE "$ROOT/bin/fm-rex-marks.sh" sync 2>&1) || fail "sync with an unknown value failed"
+  assert_contains "$out" "unknown value; using on" "a value other than on or off must warn and read as on"
+  grep -q 'id=fm:msg=' "$tty" || fail "an unknown value must read as on"
+  pass "rex: the marks producer plans from status, writes once, repairs without re-notifying, clears on resolve, and honors off"
 }
 
 test_every_call_pins_server_and_never_autostarts
@@ -1106,7 +1111,7 @@ test_afk_launch_rex_terminal_lifecycle
 test_remote_control_rex_arm
 test_tab_label_is_sidebar_sized
 test_mark_is_one_status_record_plus_optional_notification
-test_mark_read_and_label_flag
+test_mark_read_and_tab_rename
 test_busy_state_trusts_only_proven_program_status
 test_submit_confirms_from_a_working_edge
 test_wait_transition_reads_rex_events

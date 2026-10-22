@@ -139,11 +139,10 @@ wait "$EVENTS_PID" 2>/dev/null || true
 fm_backend_rex_mark "$TB" clear "" "" fm-smoke-b || smoke_fail "the mark could not be cleared"
 [ "$(fm_backend_rex_mark_read "$TB")" = $'clear\t\t' ] || smoke_fail "clearing left Firstmate's record behind"
 fm_backend_rex_capture "$TB" 50 fm-smoke-b | grep -q '7501\|777' && smoke_fail "a mark's bytes showed on the screen"
-fm_backend_rex_label_flag "$TB" on "" fm-smoke-b || smoke_fail "the labels fallback could not flag the tab"
+fm_backend_rex_tab_rename "$TB" "Ship · renamed" fm-smoke-b || smoke_fail "the tab could not be renamed"
 VIEW=$(fm_backend_rex_cli window ls -s "session:$SID" --json)
-[ "$(printf '%s' "$VIEW" | jq -r --arg w "window:$WID_B" '.windows[] | select(.window_id == $w) | .label')" = "⚑ Ship · smoke-b" ] || smoke_fail "the labels fallback did not prefix the tab"
-fm_backend_rex_label_flag "$TB" off "" fm-smoke-b || smoke_fail "the labels fallback could not unflag the tab"
-pass "rex smoke: a mark is an invisible id=fm record plus a streamed desktop notification ($NOTE), cleared alone; the labels fallback flags the tab"
+[ "$(printf '%s' "$VIEW" | jq -r --arg w "window:$WID_B" '.windows[] | select(.window_id == $w) | .label')" = "Ship · renamed" ] || smoke_fail "the tab rename did not take"
+pass "rex smoke: a mark is an invisible id=fm record plus a streamed desktop notification ($NOTE), cleared alone; a tab rename takes"
 
 # The push wait over a real stream: a root blocked report from inside the pane
 # is the actionable edge, and the pane's program exiting is dead.

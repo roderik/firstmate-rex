@@ -135,7 +135,7 @@ Rex has no API to set a record, so the mark is one small write to the pane's ter
 The watcher runs `fm-rex-marks.sh sync` once per poll while any Rex task or cached mark exists, and cleanup clears the mark before closing the pane.
 Every write first checks the block label, so a mark never lands on a pane that no longer belongs to the task.
 
-`config/rex-status-marks` selects the channel: `on` (the default when the file is absent), `off`, or `labels`, which instead prefixes the tab label with `⚑ ` while the worker needs the captain.
+`config/rex-status-marks` turns the marks `on` (the default when the file is absent) or `off`; turning them off clears every mark already shown.
 `state/.rex-mark-<id>` caches the last mark so a sync writes only on change.
 
 ## Event push
@@ -145,7 +145,7 @@ On Rex the watcher wakes on Rex events instead of only polling.
 
 - `program_status_changed` to `blocked` on the root record is an agent waiting on a human; it escalates at once, and a later `working` re-arms it.
 - `child_exited` or `block_closed` is a worker that exited or a pane that closed; it escalates at once instead of waiting for the liveness poll.
-  A tab Firstmate closes itself, such as at teardown, never escalates: the close records the `dead` edge as already handled first.
+  A tab Firstmate closes itself, such as at teardown, never escalates: the close records the `dead` edge as already handled first, and a `dead` edge for a pane no task record names any more is dropped.
 - `idle` and `done` defer to the ordinary checks, and Firstmate's own records (`app=firstmate`, or any child `id`) are ignored.
 
 The stream replays nothing, so every subscribe pokes the session until a `client_connected` event proves it live and then reconciles each watched block by reading its current state.
@@ -154,7 +154,7 @@ Exit 4, a closed stream, or a failed subscribe returns to plain polling for that
 
 ## Busy and submit signals
 
-Claude Code publishes a root program status on Rex that leaves `working` once its turn ends, proven by `tests/fm-rex-program-status-live-e2e.test.sh`, so for it `fm_backend_busy_state` reads `working` as busy (only while the agent process is alive) and `idle`, `done`, or `blocked` as idle.
+Claude Code publishes a root program status on Rex, proven by `tests/fm-rex-program-status-live-e2e.test.sh`, which also fails if that record still reads `working` after the worker reports done; so for it `fm_backend_busy_state` reads `working` as busy (only while the agent process is alive) and `idle`, `done`, or `blocked` as idle.
 A steer is confirmed submitted when the composer reads empty, or when the root status moves to `working` from a baseline that was not already working.
 `FM_BACKEND_REX_STATUS_APPS` lists the harnesses trusted this way; every other harness keeps capture and hash polling.
 
