@@ -26,6 +26,8 @@
 # pane (another parent home may own it). All of this runs under a home-wide
 # lock shared with the retirement of a session once it holds nothing. Tabs
 # are created with `--focus=false`, so a spawn never moves the captain's view.
+# A worker may add side panes labeled `<block label>/<name>` to its own tab
+# (bin/fm-rex-side.sh); fm_backend_rex_kill closes them with the task.
 # The Rex server is the shared container, and Firstmate never starts, stops,
 # or restarts it.
 #
@@ -149,20 +151,24 @@ fm_backend_rex_default_server() {
   printf '%s' "$endpoint"
 }
 
-# fm_backend_rex_server_of_target: the `rex_server=` recorded by the task
-# whose `window=` is <target>, or failure.
-fm_backend_rex_server_of_target() { # <target>
-  local target=$1 meta window server
+# fm_backend_rex_record_field: the `<key>=` value recorded by the task whose
+# `window=` is <target>, or failure.
+fm_backend_rex_record_field() { # <target> <key>
+  local target=$1 key=$2 meta window value
   for meta in "${STATE:-$FM_HOME/state}"/*.meta; do
     [ -f "$meta" ] || continue
     window=$(sed -n 's/^window=//p' "$meta" 2>/dev/null | tail -1)
     [ "$window" = "$target" ] || continue
-    server=$(sed -n 's/^rex_server=//p' "$meta" 2>/dev/null | tail -1)
-    [ -n "$server" ] || return 1
-    printf '%s' "$server"
+    value=$(sed -n "s/^$key=//p" "$meta" 2>/dev/null | tail -1)
+    [ -n "$value" ] || return 1
+    printf '%s' "$value"
     return 0
   done
   return 1
+}
+
+fm_backend_rex_server_of_target() { # <target>
+  fm_backend_rex_record_field "$1" rex_server
 }
 
 # fm_backend_rex_server: the server a call for [target] must address (order in
@@ -843,17 +849,22 @@ fm_backend_rex_endpoint_absence_recheck() { # <target>
   fm_backend_rex_agent_state "$1"
 }
 
-# fm_backend_rex_kill: close the task's block, then prove it gone (exit 3) and
-# retire this home's own session if that was its last tab. 0 = closed or
-# already gone; 1 = the block may still be live (unreachable server, a label
-# that no longer matches, or a close that did not take). The deliberate close
-# pre-commits the block's `dead` edge, so an armed watcher never escalates it.
+# fm_backend_rex_kill: close the task's block, then prove it gone (exit 3),
+# close its side panes, and retire this home's own session if that was its
+# last tab. 0 = closed or already gone; 1 = the block may still be live
+# (unreachable server, a label that no longer matches, or a close that did not
+# take). The deliberate close pre-commits the block's `dead` edge, so an armed
+# watcher never escalates it.
 fm_backend_rex_kill() { # <target> [unused] [expected-label]
-  local target=$1 expected_label=${3:-} dead_marker
+  local target=$1 expected_label=${3:-} dead_marker sid view window label
   if ! fm_backend_rex_target_ready "$target" "$expected_label"; then
     case "$FM_BACKEND_REX_READY_RC" in
       3)
-        fm_backend_rex_retire_home_session "$FM_BACKEND_REX_SESSION_ID" "$target" "$expected_label"
+        sid=$FM_BACKEND_REX_SESSION_ID
+        if [ -n "$expected_label" ] && window=$(fm_backend_rex_record_field "$target" rex_window_id); then
+          fm_backend_rex_close_side_panes "$target" "window:$window" "$(fm_backend_rex_scoped_name "$expected_label")"
+        fi
+        fm_backend_rex_retire_home_session "$sid" "$target" "$expected_label"
         return 0
         ;;
       4)
@@ -866,6 +877,10 @@ fm_backend_rex_kill() { # <target> [unused] [expected-label]
         ;;
     esac
   fi
+  sid=$FM_BACKEND_REX_SESSION_ID
+  view=$(fm_backend_rex_block_inspect "$target")
+  window=$(printf '%s' "$view" | jq -r '.block.window_id // empty' 2>/dev/null)
+  label=$(printf '%s' "$view" | jq -r '.block.label // empty' 2>/dev/null)
   dead_marker=$(fm_backend_rex_escalation_marker "${STATE:-$FM_HOME/state}" "$target" dead)
   { : >"$dead_marker"; } 2>/dev/null || true
   FM_BACKEND_REX_TARGET_HINT=$target fm_backend_rex_cli block close -s "$FM_BACKEND_REX_SESSION_ID" "$FM_BACKEND_REX_BLOCK_ID" >/dev/null 2>&1 || true
@@ -875,7 +890,33 @@ fm_backend_rex_kill() { # <target> [unused] [expected-label]
     echo "error: the Rex block for $target is still present after close" >&2
     return 1
   fi
-  fm_backend_rex_retire_home_session "$FM_BACKEND_REX_SESSION_ID" "$target" "$expected_label"
+  fm_backend_rex_close_side_panes "$target" "$window" "$label"
+  fm_backend_rex_retire_home_session "$sid" "$target" "$expected_label"
+  return 0
+}
+
+# fm_backend_rex_close_side_panes: close the side panes bin/fm-rex-side.sh
+# opened for the task - blocks labeled `<scoped-label>/<name>` - in typed
+# window <window> of the task's session, on the task's server, proving each
+# gone. Every other pane, in that tab or elsewhere, is untouched. A side pane
+# is not the worker, so an unreadable inventory or a close that does not take
+# only warns.
+fm_backend_rex_close_side_panes() { # <target> <typed-window-id> <scoped-label>
+  local target=$1 window=$2 label=$3 server sid out bid
+  case "$window:$label" in window:?*:fm-?*) ;; *) return 0 ;; esac
+  case "$label" in */*) return 0 ;; esac
+  fm_backend_rex_parse_target "$target" || return 0
+  sid=$FM_BACKEND_REX_SESSION_ID
+  server=$(fm_backend_rex_server "$target") || return 0
+  out=$(FM_BACKEND_REX_SERVER=$server fm_backend_rex_cli block ls -s "$sid" --json 2>/dev/null) || {
+    echo "warning: could not list the Rex panes of $target; its side panes may remain" >&2
+    return 0
+  }
+  for bid in $(printf '%s' "$out" | jq -r --arg w "$window" --arg p "$label/" \
+    '.blocks[]? | select(.window_id == $w and ((.label // "") | startswith($p))) | .block_id' 2>/dev/null); do
+    FM_BACKEND_REX_SERVER=$server fm_backend_rex_block_close "${sid#session:}:${bid#block:}" ||
+      echo "warning: the Rex side pane $bid of $target is still present after close" >&2
+  done
   return 0
 }
 
@@ -919,8 +960,9 @@ fm_backend_rex_retire_session_locked() { # <typed-session-id> <labels>
   return 0
 }
 
-# fm_backend_rex_list_live: every live block on the selected server whose
-# label is scoped to this home, as "<session-uuid>:<block-uuid>\tfm-<id>".
+# fm_backend_rex_list_live: every live task block on the selected server
+# whose label is scoped to this home (side panes, `<label>/<name>`, excluded),
+# as "<session-uuid>:<block-uuid>\tfm-<id>".
 # Read-only: an unreachable server lists nothing.
 fm_backend_rex_list_live() {
   local list sid prefix bid label
@@ -931,7 +973,7 @@ fm_backend_rex_list_live() {
       [ -n "$bid" ] || continue
       printf '%s:%s\tfm-%s\n' "${sid#session:}" "${bid#block:}" "${label#"$prefix"}"
     done < <(fm_backend_rex_cli block ls -s "$sid" --json 2>/dev/null |
-      jq -r --arg p "$prefix" '.blocks[]? | select(.label | startswith($p)) | "\(.block_id)\t\(.label)"' 2>/dev/null)
+      jq -r --arg p "$prefix" '.blocks[]? | select((.label | startswith($p)) and (.label | contains("/") | not)) | "\(.block_id)\t\(.label)"' 2>/dev/null)
   done
 }
 
