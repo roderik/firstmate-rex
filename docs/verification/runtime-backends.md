@@ -2221,7 +2221,7 @@ Current active CLI findings:
 | --- | --- | --- |
 | Version gate | `version --json`, `server status --json` | Reports `api_revision` and the server's `instance_id` without starting anything when `--autostart=false` is passed. |
 | Autostart | any call with the default `--autostart` against a missing socket | Starts a fresh, empty server at that socket; with `--autostart=false` the same call exits 4 and creates nothing (the smoke checks the socket never appears). |
-| Session create | `new <label> -c <dir> --json` | Creates a session with one initial window and block; the adapter closes those so the home session holds only task tabs. |
+| Session create | `new <label> -c <dir> --window <tab> --keep-open --json` | Creates a session with one initial window and block under that tab label; the adapter uses it as the task's tab, so a new `fm-local` or `fm-<id>` session holds only task tabs. |
 | Tab create | `window new -s <session> tab -c <dir> --focus=false --keep-open --json` | Adds a tab without moving the session's active window; returns the typed session, window, and block ids. |
 | Block label | `block rename -s <session> <block> <label>` | Sets the label; labels are not unique, and a label-addressed command that matches two blocks refuses as ambiguous, so the adapter addresses blocks by full id only. |
 | Inspect | `block inspect <block-id> --json` | Returns the block's session, label, and `last_exit`; a closed block's full id exits 3. |
@@ -2231,6 +2231,9 @@ Current active CLI findings:
 | Close | `block close -s <session> <block-id>` | Closes only that block and its tab; the sibling tab and the session stay live, and a later inspect of the block exits 3. |
 | Session retire | `kill <session-id>` after the last tab closes | Closes the emptied home session; it runs under the home-wide `state/.rex-session.lock` shared with spawn. |
 | Unreachable server | any call against a dead socket | Exits 4, which the adapter reads as unknown, never gone. |
+| Tab order | `window move -s <session> <window-id> --index 1` | Moves a reused second mate session's new tab to the front; the second mate pane stays the first tab. |
+| Detached block | `api call -s <session> session.new_block '{"flavor":"com.superlogical.terminal.shell","label":...,"options":{"cwd":...,"initial_input":...}}'` | Creates a block in no tab (`placement` reads `detached`) running a login shell that receives the input; `session inspect` omits it, `block ls -s <session> --json` lists it, and closing it by full id is then proven by exit 3. |
+| Detached foreground | `block call ... com.superlogical.terminal.process` on a detached zsh block after `exec <cmd>` | Reports `login` as the foreground, because zsh hands the terminal back to its parent on `exec`; the away-mode test finds the daemon among the processes on the block's tty instead. |
 
 Environment markers: a Rex pane exports `REX_SERVER`, `REX_SESSION`, `REX_BLOCK`, `REX_CLIENT`, and `REX_BIN_DIR`, and a tmux server started from a Rex pane passes them to its own panes, so a marker alone never selects Rex.
 `fm_backend_detect` selects Rex only when `REX_BLOCK` inspects live on the server, sits in `REX_SESSION`, and that block's process is an ancestor of the detecting process.
@@ -2240,11 +2243,35 @@ Children of a server started with `rex server run` get no `REX_SERVER`, and Rex 
 ```sh
 tests/fm-backend-rex.test.sh
 tests/fm-backend-rex-smoke.test.sh
+tests/fm-afk-inject-rex-e2e.test.sh
+tests/fm-remote-doctor-rex.test.sh
+FM_REX_SECONDMATE_E2E=1 tests/fm-rex-secondmate-e2e.test.sh
 FM_REX_CLAUDE_LIVE=1 tests/fm-rex-claude-live-e2e.test.sh
 ```
 
-The fake-binary suite pins the call contract (`-S`, `--autostart=false`, full ids, stripped markers), server resolution, the version gate, session create, adopt, and refusal paths, keys, composer, agent state, the absence verdict, the kill matrix, detection, and the secondmate refusal.
-The real smoke proves one unfocused `firstmate` session with labeled tabs, duplicate-label refusal, live cwd, literal send and keys, agent state from real processes (an idle shell reads dead, `sleep` reads ambiguous, a `claude`-named process reads alive), the scrollback capture, block-only close with exit 3, session retirement after the last tab, and exit 4 with nothing autostarted.
+The fake-binary suite pins the call contract (`-S`, `--autostart=false`, full ids, stripped markers), server resolution, the version gate, `fm-local` and `fm-<id>` placement with its adopt, reuse, and refusal paths, the supervisor-session exclusion, keys, composer, agent state, the absence verdict, the kill and session-retirement matrix, detection, supervisor discovery, the detached block, and the away launcher's record lifecycle.
+The real smoke proves one unfocused `fm-local` session holding exactly the task tabs, duplicate-label refusal, live cwd, literal send and keys, agent state from real processes (an idle shell reads dead, `sleep` reads ambiguous, a `claude`-named process reads alive), the scrollback capture, block-only close with exit 3, session retirement after the last tab, a second mate pane as the first tab of its `fm-<id>` session with a worker spawned from inside that pane joining the same session, and exit 4 with nothing autostarted.
+
+On 2026-10-22, with the same Rex build on lab servers, the token-free away-mode guard passed:
+
+```text
+ok - rex afk: discovery proves the Rex pane it runs in, and the same REX_* without ancestry falls back
+ok - rex afk: the daemon runs in a recorded detached block of the captain's session and closes by exact id
+ok - rex afk: an escalation is typed once and submitted into the Rex supervisor pane
+ok - rex afk: the composer gate defers an inject over pending captain input
+```
+
+The opt-in second mate guard passed with `pi 1.3.0`, whose session-only extension aborts before any model request:
+
+```text
+ok - real Pi/Rex: --secondmate opens the first tab of its own fm-<id> session, labeled for the parent home
+ok - real Pi/Rex: an exact-id fm-send stores the request and rings the secondmate with its inbox doorbell
+ok - real Pi/Rex: a destroyed secondmate endpoint is proven gone and respawns into its recorded session
+ok - real Pi/Rex: closing the secondmate retires its emptied session
+```
+
+One of four consecutive runs of that guard missed the doorbell wait before passing on rerun; the other three passed.
+A Pi composer on Rex reads `unknown`, because the classifier runs without a cursor row and Pi's prompt carries no identifying border, so an away-mode inject into a Pi supervisor defers rather than types.
 
 The opt-in Claude guard passed on 2026-10-21 with `claude 2.1.306 (Claude Code)`:
 
