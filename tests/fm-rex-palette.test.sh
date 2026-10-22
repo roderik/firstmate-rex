@@ -82,6 +82,11 @@ assert_contains "$(cat "$FAKE/log")" "config reload" "install reloads the server
 [ ! -e "$CFG" ] || fail "uninstall left a config that only Firstmate had created"
 pass "install creates an absent config with a created marker, and uninstall deletes it again"
 
+out=$(FM_REX_SERVER= REX_SERVER=unix:///tmp/fm-rex-palette-pane.sock "$INSTALLER" install 2>&1) || fail "install from a Rex pane failed: $out"
+assert_contains "$(cat "$CFG")" 'server = "unix:///tmp/fm-rex-palette-pane.sock"' "the block records the pane's REX_SERVER"
+FM_REX_SERVER= REX_SERVER=unix:///tmp/fm-rex-palette-pane.sock "$INSTALLER" uninstall >/dev/null 2>&1 || fail "uninstall from a Rex pane failed"
+pass "install from a Rex pane records that pane's server"
+
 # The captain's own file, without a trailing newline.
 rm -f "$CFG_DIR"/init.lua.fm-backup.*
 printf -- '-- captain\nrex.bind("cmd+d", "pane.split", { direction = "right" })\nrex.action{ name = "mine", title = "Mine", run = function() end }' >"$CFG"
@@ -271,3 +276,7 @@ out=$(printf '1\nn\n' | "$POPUP" merge demo 2>&1) || fail "a declined merge requ
 out=$(printf '1\ny\n\n' | "$POPUP" merge demo 2>&1) || fail "the merge body failed"
 assert_contains "$(notes)" "Merge request: https://github.com/o/r/pull/9 (task demo)" "a merge request files a note with the PR URL"
 pass "the answer, note, and merge popups only file captain inbox notes"
+
+out=$(printf '\n' | "$POPUP" this mate1 2>&1) || fail "the this body failed: $out"
+assert_contains "$out" "Task:      mate1 (secondmate)" "a task without a project names only its kind"
+pass "the this popup omits the project for a task without one"

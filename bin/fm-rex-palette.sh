@@ -12,11 +12,11 @@
 #   fm-rex-palette.sh status [--server <unix://...>]
 #   fm-rex-palette.sh check [--server <unix://...>]
 #
-# The server is --server, else FM_REX_SERVER, else the default local Rex
-# server; it must be a local unix:// server, because Rex reloads its config
-# only over the local socket. The file is the one that server reports
-# (`rex keymap --json` .config.path, which honors a server-side REX_CONFIG);
-# when it is a symlink, the file it points to is edited in place.
+# The server is --server, else FM_REX_SERVER, else REX_SERVER (set inside a
+# Rex pane), else the default local Rex server; it must be a local unix://
+# server, because Rex reloads its config only over the local socket. The file
+# is the one that server reports (`rex keymap --json` .config.path, which
+# honors a server-side REX_CONFIG); a symlink's target is edited in place.
 #
 # Firstmate owns only the lines from the exact begin marker line to the exact
 # end marker line below, and refuses a file with unbalanced or repeated
@@ -26,9 +26,10 @@
 # bin/backends/rex-palette.lua inside pcall; when that fails, a
 # `fm_load_error` palette entry shows why, and the captain's own config
 # still loads. The block records this checkout's root, FM_HOME, the caller's
-# PATH (an app-started Rex server runs with a minimal PATH), and --server when
-# one was given. When install creates the file, the block carries a created
-# marker, and uninstall deletes the file again if nothing else is left in it.
+# PATH (an app-started Rex server runs with a minimal PATH), and the server
+# unless it came from default discovery. When install creates the file, the
+# block carries a created marker, and uninstall deletes the file again if
+# nothing else is left in it.
 #
 # Each write builds the new file next to the old one, requires `rex config
 # check` to pass on it, copies the old file to <file>.fm-backup.<UTC stamp>,
@@ -207,7 +208,7 @@ reload() {
     printf 'reloaded: %s\n' "$(printf '%s' "$out" | tr '\n' ' ')"
   else
     printf '%s\n' "$out" >&2
-    die "the file was written, but rex config reload failed; run it again once the server is reachable"
+    die "the file was written, but rex config reload failed; run \`rex -S $SERVER config reload\` once the server is reachable"
   fi
 }
 
@@ -291,10 +292,10 @@ main() {
   done
   case "$cmd" in
     install | uninstall | status | check) ;;
-    -h | --help | help) sed -n '2,42p' "$0" | sed 's/^# \{0,1\}//'; return 0 ;;
+    -h | --help | help) sed -n '2,43p' "$0" | sed 's/^# \{0,1\}//'; return 0 ;;
     *) usage ;;
   esac
-  [ -n "$SERVER" ] || SERVER=${FM_REX_SERVER:-}
+  [ -n "$SERVER" ] || SERVER=${FM_REX_SERVER:-${REX_SERVER:-}}
   resolve_server
   resolve_config
   "cmd_$cmd"

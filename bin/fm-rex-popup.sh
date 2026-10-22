@@ -384,7 +384,7 @@ body_this() {
     (.tasks // []) | map(select(.id == $t)) | .[0] as $r
     | if $r == null then "No record for \($t)."
       else
-        "Task:      \($r.id) (\($r.kind // "ship")\(if $r.project then ", project " + $r.project else "" end))",
+        "Task:      \($r.id) (\($r.kind // "ship")\(if ($r.project // "") != "" then ", project " + $r.project else "" end))",
         (if $r.remote then "Runs on:   \($r.remote.host // "another host") (second mate)" else empty end),
         "Latest:    \($r.hints.last_event_text // "no status yet")",
         (($r.hints.open_decisions // [])[] | "Decision:  [\(.key // "-")] \(.summary // "")"),
