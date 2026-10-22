@@ -2324,12 +2324,14 @@ Whether the Rex app then shows a banner could not be observed headless: attachin
 A read-only listing of the captain's own server shows the sidebar's tab entry is the window label, set by `window rename` and the tab label at creation; the block label is a separate field, and the terminal title is the agent's own title, read through the `title` method.
 Firstmate therefore puts the short display label on the window and keeps the block label `fm-<home-label>-<id>` as the identity check.
 
-The real smoke on a lab server passed:
+The real smoke on a lab server passed (the first line is shown without its clause for a since-removed tab-label fallback):
 
 ```text
-ok - rex smoke: a mark is an invisible id=fm record plus a streamed desktop notification ({"title":"Firstmate: smoke","body":"Needs your decision"}), cleared alone; the labels fallback flags the tab
+ok - rex smoke: a mark is an invisible id=fm record plus a streamed desktop notification ({"title":"Firstmate: smoke","body":"Needs your decision"}), cleared alone
 ok - rex smoke: the event wait returns a real blocked report and a real exit as dead, and an unreachable server is unusable, never dead
 ```
+
+The smoke's tab-rename assertion (`fm_backend_rex_tab_rename`, behind `fm-spawn.sh --title` on relaunch) was added after that dated run and has no recorded real-server run yet.
 
 The opt-in per-harness guard records which root program states each installed harness publishes on Rex; only harnesses it proves are trusted for busy state and submit confirmation:
 
