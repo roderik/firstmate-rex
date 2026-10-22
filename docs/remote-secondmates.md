@@ -457,7 +457,7 @@ The host checks that the launched pane really sits in a live session with that l
 
 - An explicit request for a backend other than Herdr or Rex is refused rather than honored, and the remote host refuses one too.
 - A launch that names the other backend than the one a live endpoint is recorded on is refused; retire that endpoint first.
-- An existing remote endpoint recorded in another Herdr session, including `default`, or a Rex endpoint outside its recorded session, is classified as unverified and left untouched.
+- An existing remote endpoint recorded in another Herdr session, including `default`, or a Rex endpoint whose record is inconsistent, is classified as unverified and left untouched.
   Launch, liveness recovery, control, and retirement refuse it until an operator explicitly migrates it, instead of attempting a live cutover.
 - A launch after a host has drifted out of readiness fails with the doctor's own gap text instead of leaving a half-created endpoint.
 - Raw launch commands are not accepted for remote secondmates.

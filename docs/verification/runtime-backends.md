@@ -2273,6 +2273,28 @@ ok - real Pi/Rex: closing the secondmate retires its emptied session
 One of four consecutive runs of that guard missed the doorbell wait before passing on rerun; the other three passed.
 A Pi composer on Rex reads `unknown`, because the classifier runs without a cursor row and Pi's prompt carries no identifying border, so an away-mode inject into a Pi supervisor defers rather than types.
 
+### Remote second mate on a real host
+
+On 2026-10-22 a remote second mate ran on a second Mac's own app-owned Rex server: `rex 0.0.1792607779-g171246`, API revision 5, reached by Firstmate through the CLI inside the app bundle (the account's non-interactive `PATH` has no `rex`).
+That server is the one the captain's Rex client was connected to, so every session below was visible in the client's tree; the host was driven directly, with no lab server.
+
+| Step | Command shape | Result |
+| --- | --- | --- |
+| Readiness | `fm-on.sh <id> fm-remote-doctor.sh --backend rex`, through the remote job worker | `check rex=ok` (the bundle CLI), `check rex-server=ok` (the app server's socket), and the job worker, GUI session, and entrypoint checks passed with no Herdr checks. |
+| Seed | `fm-remote-home-seed.sh --backend rex <id> <alias> <root> <home> --no-projects` | Gated readiness for Rex and provisioned the home. |
+| Launch | `fm-spawn.sh <id> --secondmate --backend rex --harness claude` | Opened a real Claude second mate as the only tab (`2ndmate·<id>`) of a new `fm-<id>` session; the parent record holds `remote_backend=rex` and `remote_rex_session=fm-<id>`. |
+| Route and state | `fm-remote-secondmate-control.sh state`, `route`, `observe`, `capture` | `alive`, the Rex route block, a busy then idle observation, and the pane text. |
+| Steer and reply | `fm-send.sh <id> '<request>'` | Stored the request in the host's steering inbox and rang the doorbell into the Rex pane; the agent handled it and moved it to `handled/`, and its correlated reply settled the parent's pending-reply record. |
+| Keys | `fm-send.sh <id> --key C-l` | Delivered through the adapter by the recorded block and its scoped label. |
+| Liveness | `fm_secondmate_liveness_probe ... full`, then closing the block on the host | `alive` with a matching route backend, then `relaunchable` with `missing` after the close. |
+| Recovery | `fm-spawn.sh <id> --secondmate` with no `--backend` | Stayed on Rex from the parent record and opened a new `fm-<id>` session. |
+| Relaunch | `fm-remote-secondmate-relaunch.sh <id> claude default <effort>` | Replaced the agent in the same block and republished the parent's record. |
+| Retire | `fm-teardown.sh <id>` | Closed the pane, retired the emptied `fm-<id>` session, and removed the remote home and the parent's route records. |
+
+On this API revision 5 server, closing a session's last block destroyed the session, while the emptied session on the API revision 4 lab server stayed live; either way the adapter's recorded-session check reads exit 3 and creates a new labeled session.
+The first relaunch attempt in this run stopped the agent and then refused with `task record authorized directory cannot be resolved at <home>/state/parent-route`; rerun from the stopped state, and again from a live agent, it succeeded, and the refusal did not recur.
+The first retirement in this run removed the remote home and then failed on the busy-state retire step, because the host-side record lives inside that home; the second run, after that step skips a state directory that no longer exists, retired cleanly.
+
 The opt-in Claude guard passed on 2026-10-21 with `claude 2.1.306 (Claude Code)`:
 
 ```text

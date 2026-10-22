@@ -98,7 +98,7 @@ daemon_running() {
   pid=$(fm_backend_rex_block_call "$DAEMON" process | jq -r '.foreground.pid // empty')
   [ -n "$pid" ] || return 1
   tty=$(ps -o tty= -p "$pid" 2>/dev/null | tr -d '[:space:]')
-  [ -n "$tty" ] && ps -t "$tty" -o comm= 2>/dev/null | grep -qx 'sleep'
+  [ -n "$tty" ] && ps -t "$tty" -o comm= 2>/dev/null | awk '$0 == "sleep" { found = 1 } END { exit !found }'
 }
 wait_for 100 daemon_running || e2e_fail "the daemon command never ran in the detached block's login shell: $(fm_backend_rex_cli capture -s "session:$SID" -b "block:${DAEMON#*:}" --trim 2>&1 | tail -5)"
 OUT=$(
@@ -156,7 +156,9 @@ injected() { grep -q 'Firstmate operational input waiting' "$LOG_FILE"; }
 wait_for 50 injected || e2e_fail "the injected escalation never reached the supervisor pane; log: $(cat "$LOG_FILE")"
 [ "$(grep -c . "$LOG_FILE")" = 1 ] || e2e_fail "exactly one line should have been submitted, got: $(cat "$LOG_FILE")"
 RECORD=$(sed -n "s/.*read '\([^']*\)'.*/\1/p" "$LOG_FILE")
-[ -f "$RECORD" ] && grep -q 'rex-e2e escalation one' "$RECORD" || e2e_fail "the doorbell's record '$RECORD' does not hold the escalation"
+if [ ! -f "$RECORD" ] || ! grep -q 'rex-e2e escalation one' "$RECORD"; then
+  e2e_fail "the doorbell's record '$RECORD' does not hold the escalation"
+fi
 pass "rex afk: an escalation is typed once and submitted into the Rex supervisor pane"
 
 fm_backend_rex_send_literal "$SUP" "half typed by the captain" fm-afk-supervisor || e2e_fail "could not type into the composer"

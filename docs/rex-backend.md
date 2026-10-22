@@ -57,9 +57,9 @@ backend=rex
 window=<session-uuid>:<block-uuid>
 rex_server=<server endpoint>
 rex_server_instance=<server instance id>
-rex_session_id=session:<uuid>
-rex_window_id=window:<uuid>
-rex_block_id=block:<uuid>
+rex_session_id=<session-uuid>
+rex_window_id=<window-uuid>
+rex_block_id=<block-uuid>
 ```
 
 `rex_server_instance` lets recovery tell a restarted server from a closed pane.

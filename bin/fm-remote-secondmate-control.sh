@@ -95,7 +95,7 @@ validate_home() { # <id> [allow-absent]
 meta_path() { printf '%s/%s.meta\n' "$CONTROL_STATE" "$1"; }
 
 remote_endpoint_load() {
-  local id=$1 herdr_session rex_session
+  local id=$1 herdr_session
   REMOTE_ENDPOINT_ERROR=
   REMOTE_ENDPOINT_META=$(meta_path "$id")
   if ! fm_backend_validate_task_endpoint "$REMOTE_ENDPOINT_META" "$id" 2>/dev/null; then
@@ -111,16 +111,10 @@ remote_endpoint_load() {
       return 1
       ;;
   esac
-  if [ "$REMOTE_ENDPOINT_BACKEND" = rex ]; then
-    # The recorded block must sit in the recorded session; that session's
-    # label is checked live wherever a launch depends on it.
-    rex_session=$(fm_backend_meta_exact_value "$REMOTE_ENDPOINT_META" rex_session_id 2>/dev/null || true)
-    if [ -z "$rex_session" ] || [ "${REMOTE_ENDPOINT_TARGET%%:*}" != "$rex_session" ]; then
-      REMOTE_ENDPOINT_ERROR="remote secondmate $id endpoint target '$REMOTE_ENDPOINT_TARGET' is outside its recorded Rex session '${rex_session:-missing}'; refusing access until it is explicitly migrated"
-      return 1
-    fi
-    return 0
-  fi
+  # A rex record's target is already bound to its recorded session and block
+  # by fm_backend_validate_task_endpoint; launch checks that session's label
+  # live (rex_session_check).
+  [ "$REMOTE_ENDPOINT_BACKEND" != rex ] || return 0
   herdr_session=$(fm_backend_meta_exact_value "$REMOTE_ENDPOINT_META" herdr_session 2>/dev/null || true)
   if [ "$herdr_session" != "$REMOTE_HERDR_SESSION" ]; then
     REMOTE_ENDPOINT_ERROR="remote secondmate $id endpoint is recorded in Herdr session '${herdr_session:-missing}', expected '$REMOTE_HERDR_SESSION'; refusing access until it is explicitly migrated"

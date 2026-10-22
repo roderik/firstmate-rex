@@ -770,6 +770,40 @@ test_afk_launch_rex_terminal_lifecycle() {
   pass "rex: /afk runs the daemon in a recorded detached block on the captain's server and closes it by exact id"
 }
 
+# The host control for a remote second mate reads its parent-route record on
+# Rex: route names the visible fm-<id> session, an inconsistent record is
+# unverified, and a rex endpoint is never relaunched onto herdr.
+test_remote_control_rex_arm() {
+  local home meta out rc
+  new_case remote-control
+  home="$CASE/rsm-home"
+  mkdir -p "$home/bin" "$home/state/parent-route"
+  printf 'rsm\n' >"$home/.fm-secondmate-home"
+  : >"$home/AGENTS.md"
+  meta="$home/state/parent-route/rsm.meta"
+  write_route() { # <rex_session_id>
+    printf '%s\n' "window=$T" "endpoint_task_id=rsm" "worktree=$home" "project=$home" "backend=rex" \
+      "rex_server=$SERVER" "rex_session_id=$1" "rex_block_id=$BID" "harness=claude" "model=" "effort=" >"$meta"
+  }
+  write_route "$SID"
+  out=$(FM_HOME=$home "$ROOT/bin/fm-remote-secondmate-control.sh" route rsm 2>&1) || fail "route should print a rex record: $out"
+  assert_contains "$out" "backend=rex" "route should name the rex backend"
+  assert_contains "$out" "target=$T" "route should print the exact block target"
+  assert_contains "$out" "rex_session=fm-rsm" "route should name the visible fm-<id> session"
+  assert_not_contains "$out" "herdr_session" "a rex route must not name a Herdr session"
+  out=$(FM_HOME=$home "$ROOT/bin/fm-remote-secondmate-control.sh" state rsm 2>/dev/null)
+  [ "$out" = missing ] || fail "a closed remote block should read missing, got '$out'"
+  rc=0
+  out=$(FM_HOME=$home "$ROOT/bin/fm-remote-secondmate-control.sh" launch rsm claude - - herdr 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] || fail "a rex endpoint must not be relaunched onto herdr"
+  assert_contains "$out" "recorded on backend 'rex'" "the refusal should name the recorded backend"
+  write_route "$LSID"
+  out=$(FM_HOME=$home "$ROOT/bin/fm-remote-secondmate-control.sh" state rsm 2>/dev/null)
+  [ "$out" = unverified ] || fail "a target outside the recorded session should be unverified, got '$out'"
+  calls | grep -q ' close \| send \| kill ' && fail "reading a remote record must never close, send, or kill"
+  pass "rex: the remote host control routes to fm-<id>, reads a gone block as missing, and refuses inconsistent or cross-backend records"
+}
+
 test_every_call_pins_server_and_never_autostarts
 test_server_resolution_prefers_the_task_record
 test_version_gate
@@ -796,3 +830,4 @@ test_child_teardown_scoping_as_the_child_home
 test_supervisor_discovery_requires_proof
 test_detached_block_create_and_close
 test_afk_launch_rex_terminal_lifecycle
+test_remote_control_rex_arm
