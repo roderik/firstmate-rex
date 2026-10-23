@@ -1,0 +1,10 @@
+ok - real rex: the push capability gate passes without starting a server
+ok - real rex: a driven blocked edge returns its record, with Rex's kind and message, 198ms after the report was sent
+ok - real rex: the watcher fast path enqueues a stale wake carrying Rex's blocked kind and message
+ok - real rex: an escalated block is not re-delivered and the reader runs its whole budget (2116ms for 2s)
+ok - real rex: an opt-in attention mark is one app=firstmate record on the task's pane, titled with its tab label
+ok - real rex: a Firstmate mark rewritten during a wait never escalates, through the real event reader
+ok - real rex: the pane's own blocked report still escalates beside a mark, and clear removes only Firstmate's record
+ok - real rex: closing a watched block ends the wait 198ms later for an immediate poll
+ok - real rex: a reader that cannot start returns 2 and the watcher falls back to polling
+ok - real rex: all state-changing calls stayed within this run's private server

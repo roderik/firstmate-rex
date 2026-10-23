@@ -1,0 +1,32 @@
+date: 2026-10-23T21:56:34Z
+code: 7f4ac65 feat(bin): add opt-in Rex attention marks, validation progress, and tint
+rex: rex 0.0.1792607779-g171246
+lab server: unix:///tmp/fm-rex-lab-501/fm-rexlab-uxb-pr3-live-9522418208/s.sock
+
+## 1. default (no config/rex-status-marks)
+sync_exit=0
+records: []
+caches: 0
+
+## 2. config/rex-status-marks = on
+sync_exit=0
+records: [{"app":"firstmate","id":"fm","state":"blocked","kind":"question","title":"fm-t1","msg":"Needs your decision: pick a database","owner":95393}]
+decoded msg: Needs your decision: pick a database
+cache: blocked	question	Needs your decision: pick a database
+
+## 3. the adapter never trusts Firstmate's record as worker state
+trusted_record: ''
+busy_state: unknown
+
+## 4. the real rex-eventwait.lua reader during a mark rewrite
+wait while Firstmate rewrote its mark: 1| (1| = no escalation)
+records: [{"app":"firstmate","id":"fm","state":"blocked","kind":"auth","title":"fm-t1","msg":"Blocked: needs a GitHub login","owner":95393}]
+
+## 5. control: the block's own shell reports a blocked root record
+wait while the shell reported blocked: 0|01a16ac4-07a1-7d23-8ef9-70f98decdfa5			blocked	lab-probe	question: Continue? (0|... = escalated)
+records: [{"app":"lab-probe","id":null,"state":"blocked","kind":"question","title":null,"msg":"Continue?","owner":95393},{"app":"firstmate","id":"fm","state":"blocked","kind":"auth","title":"fm-t1","msg":"Blocked: needs a GitHub login","owner":95393}]
+
+## 6. clear
+clear_exit=0
+records: [{"app":"lab-probe","id":null,"state":"blocked","kind":"question","title":null,"msg":"Continue?","owner":95393}]
+caches: 0

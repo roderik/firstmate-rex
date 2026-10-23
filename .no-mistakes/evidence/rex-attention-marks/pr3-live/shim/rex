@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+args=()
+for a in "$@"; do case "$a" in --autostart|--autostart=*) ;; *) args+=("$a") ;; esac; done
+exec env REX_BIN_DIR="/Users/roderik/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS" PATH="/Users/roderik/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" "/Users/roderik/code/firstmate-rex/bin/fm-rex-lab.sh" run "fm-rexlab-uxb-pr3-live-9522418208" "${args[@]}"
