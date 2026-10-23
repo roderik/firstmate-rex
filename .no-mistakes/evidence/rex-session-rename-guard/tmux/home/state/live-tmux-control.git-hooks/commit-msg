@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -u
-'/Users/roderik/.no-mistakes/worktrees/1711442dfac6/01M5MN0GAZ8DBQ1WXS26YP8YB7/bin/fm-git-strip-ai-trailers.sh' "$1" || exit $?
-ours='/Users/roderik/.no-mistakes/evidence/01M5MN0GAZ8DBQ1WXS26YP8YB7/tmux/home/state/live-tmux-control.git-hooks'
+'/Users/roderik/.no-mistakes/worktrees/1711442dfac6/01M5MR5G72GTWS35NBHSAT1X9H/bin/fm-git-strip-ai-trailers.sh' "$1" || exit $?
+ours='/Users/roderik/.no-mistakes/evidence/01M5MR5G72GTWS35NBHSAT1X9H/tmux/home/state/live-tmux-control.git-hooks'
 case ${GIT_CONFIG_COUNT:-} in
 '' | *[!0-9]*) ;;
 *)

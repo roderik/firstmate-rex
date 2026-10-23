@@ -20,9 +20,9 @@
     "captain": [],
     "captain_omitted": 0
   },
-  "generated": "2026-10-23T15:17:56Z",
-  "generated_epoch": 1792768676,
-  "home": "/Users/roderik/.no-mistakes/evidence/01M5MN0GAZ8DBQ1WXS26YP8YB7/rex/home",
+  "generated": "2026-10-23T16:13:41Z",
+  "generated_epoch": 1792772021,
+  "home": "/Users/roderik/.no-mistakes/evidence/01M5MR5G72GTWS35NBHSAT1X9H/rex/home",
   "valid": false,
   "reason": "missing structured backlog",
   "invalidity": {
@@ -41,11 +41,11 @@
       "state": "unknown",
       "source": "pane",
       "endpoint": {
-        "target": "01a16956-dcce-76e5-8871-9d9241d4cb17:01a16956-dcce-7a12-8cae-ef028a074180",
+        "target": "01a1698a-0c44-709c-b312-b452afcce1f1:01a1698a-0c44-7288-a94b-e244d685abe6",
         "exists": true,
         "agent_alive": "not_checked",
         "status": "unknown",
-        "observed_at": "2026-10-23T15:17:56Z",
+        "observed_at": "2026-10-23T16:13:41Z",
         "freshness": "fresh"
       }
     }

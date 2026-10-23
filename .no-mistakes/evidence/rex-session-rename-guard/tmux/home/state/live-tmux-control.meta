@@ -1,10 +1,10 @@
 window=firstmate:fm-live-tmux-control
 endpoint_task_id=live-tmux-control
-worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.Ug4ymG/proj/.treehouse/proj-e10cec/1/proj
-project=/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.Ug4ymG/proj
+worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.H39TYb/proj/.treehouse/proj-23d62a/1/proj
+project=/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.H39TYb/proj
 harness=sleep
 kind=scout
 tasktmp=/tmp/fm-live-tmux-control
 model=default
 effort=default
-spawn_gen=s1792768692.78876.7690
+spawn_gen=s1792772054.29014.26636

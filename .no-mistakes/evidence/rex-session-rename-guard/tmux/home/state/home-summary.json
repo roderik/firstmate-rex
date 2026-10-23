@@ -20,9 +20,9 @@
     "captain": [],
     "captain_omitted": 0
   },
-  "generated": "2026-10-23T15:18:14Z",
-  "generated_epoch": 1792768694,
-  "home": "/Users/roderik/.no-mistakes/evidence/01M5MN0GAZ8DBQ1WXS26YP8YB7/tmux/home",
+  "generated": "2026-10-23T16:14:15Z",
+  "generated_epoch": 1792772055,
+  "home": "/Users/roderik/.no-mistakes/evidence/01M5MR5G72GTWS35NBHSAT1X9H/tmux/home",
   "valid": false,
   "reason": "missing structured backlog",
   "invalidity": {
@@ -45,7 +45,7 @@
         "exists": true,
         "agent_alive": "not_checked",
         "status": "unknown",
-        "observed_at": "2026-10-23T15:18:14Z",
+        "observed_at": "2026-10-23T16:14:15Z",
         "freshness": "fresh"
       }
     }

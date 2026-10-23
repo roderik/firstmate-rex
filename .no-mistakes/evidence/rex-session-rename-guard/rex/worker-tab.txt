@@ -2,10 +2,10 @@
 proj main
 ❯ treehouse get
 🌳 Setting up worktree...
-🌳 Entered worktree at /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.MwYXBj/proj/.treehouse/proj-735b77/1/proj. Type 'exit' to return.
+🌳 Entered worktree at /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.gjLvup/proj/.treehouse/proj-2ef98a/1/proj. Type 'exit' to return.
 
 proj HEAD
-❯ cd -- '/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.MwYXBj/proj/.treehouse/proj-735b77/1/proj'
+❯ cd -- '/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.gjLvup/proj/.treehouse/proj-2ef98a/1/proj'
 
 proj HEAD
 ❯ export GOTMPDIR=/tmp/fm-live-rex-rename/gotmp
@@ -17,7 +17,7 @@ proj HEAD
 ❯ export FM_TASK_ID=live-rex-rename
 
 proj HEAD
-❯ . '/tmp/fm-live-rex-rename+673a447333e19f0e7514ebad98484966f0f57f8fa1f169022c63cc7f04edf755/launch.s1792768675.60141.28232.sh'
+❯ . '/tmp/fm-live-rex-rename+093af563a7dc9c10b893348b7516ea3b63fa25e8bd614b30cb92f50eafc66979/launch.s1792772021.16174.5586.sh'
 ^C
 
 proj HEAD
