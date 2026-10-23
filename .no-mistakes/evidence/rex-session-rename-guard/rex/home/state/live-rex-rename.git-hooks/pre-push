@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -u
+ours='/Users/roderik/.no-mistakes/evidence/01M5MN0GAZ8DBQ1WXS26YP8YB7/rex/home/state/live-rex-rename.git-hooks'
+case ${GIT_CONFIG_COUNT:-} in
+'' | *[!0-9]*) ;;
+*)
+  count=$((10#$GIT_CONFIG_COUNT)) i=0 kept=0
+  while [ "$i" -lt "$count" ]; do
+    key=GIT_CONFIG_KEY_$i value=GIT_CONFIG_VALUE_$i
+    if [ "${!key-}" != core.hooksPath ] || [ "${!value-}" != "$ours" ]; then
+      [ "$i" = "$kept" ] || export "GIT_CONFIG_KEY_$kept=${!key-}" "GIT_CONFIG_VALUE_$kept=${!value-}"
+      kept=$((kept + 1))
+    fi
+    i=$((i + 1))
+  done
+  export GIT_CONFIG_COUNT=$kept
+  ;;
+esac
+name=${0##*/}
+orig=$(unset GIT_CONFIG_PARAMETERS; git rev-parse --path-format=absolute --git-path hooks 2>/dev/null) || {
+  if hooks_path=$(unset GIT_CONFIG_PARAMETERS; git config --get --type=path core.hooksPath 2>/dev/null) && [ -z "$hooks_path" ]; then
+    exit 0
+  fi
+  (unset GIT_CONFIG_PARAMETERS; git rev-parse --path-format=absolute --git-path hooks >/dev/null)
+  echo "fm-git-strip-ai-trailers: cannot resolve this repository's hooks directory; refusing to skip its $name hook" >&2
+  exit 1
+}
+if [ "$orig" = "$ours" ]; then
+  exit 0
+fi
+if [ -x "$orig/$name" ]; then
+  exec "$orig/$name" "$@"
+fi

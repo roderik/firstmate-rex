@@ -1,0 +1,12 @@
+date: 2026-10-23T15:18:06Z
+code: 435c48f fix(bin): tell Rex-launched workers to ignore Rex's session-rename prompt
+tmux: tmux 3.8 private socket /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//uxb-pr2-tmux.Ug4ymG/tmux.sock
+
+spawned live-tmux-control harness=sleep kind=scout window=firstmate:fm-live-tmux-control worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.Ug4ymG/proj/.treehouse/proj-e10cec/1/proj
+spawn_exit=0
+
+window=firstmate:fm-live-tmux-control
+worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.Ug4ymG/proj/.treehouse/proj-e10cec/1/proj
+
+guard lines in tmux role: 0
+exit=0

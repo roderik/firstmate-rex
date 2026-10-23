@@ -1,0 +1,30 @@
+
+proj main
+❯ treehouse get
+🌳 Setting up worktree...
+🌳 Entered worktree at /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.MwYXBj/proj/.treehouse/proj-735b77/1/proj. Type 'exit' to return.
+
+proj HEAD
+❯ cd -- '/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.MwYXBj/proj/.treehouse/proj-735b77/1/proj'
+
+proj HEAD
+❯ export GOTMPDIR=/tmp/fm-live-rex-rename/gotmp
+
+proj HEAD
+❯ export COMPACT_ADVISER_DISABLE=1
+
+proj HEAD
+❯ export FM_TASK_ID=live-rex-rename
+
+proj HEAD
+❯ . '/tmp/fm-live-rex-rename+673a447333e19f0e7514ebad98484966f0f57f8fa1f169022c63cc7f04edf755/launch.s1792768675.60141.28232.sh'
+^C
+
+proj HEAD
+❯ "$REX_BIN_DIR/rex" -S "$REX_SERVER" --autostart=false __internal session-start --agent claude | grep -A1 'rex session rename'; echo HOOK_EXIT=$?
+Run `rex session rename "$REX_SESSION" <label>` without waiting for the user to
+ask and before loading the skill. Use two to four lowercase words joined by
+HOOK_EXIT=0
+
+proj HEAD
+❯

@@ -1,0 +1,15 @@
+window=01a16956-dcce-76e5-8871-9d9241d4cb17:01a16956-dcce-7a12-8cae-ef028a074180
+endpoint_task_id=live-rex-rename
+worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.MwYXBj/proj/.treehouse/proj-735b77/1/proj
+project=/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.MwYXBj/proj
+harness=sleep
+kind=scout
+tasktmp=/tmp/fm-live-rex-rename
+model=default
+effort=default
+spawn_gen=s1792768675.60141.28232
+backend=rex
+rex_server=unix:///tmp/fm-rex-lab-501/fm-rexlab-uxb-pr2-live-581555867/s.sock
+rex_session_id=session:01a16956-dcce-76e5-8871-9d9241d4cb17
+rex_window_id=window:01a16956-dce9-761e-af0b-fd5bec380085
+rex_block_id=block:01a16956-dcce-7a12-8cae-ef028a074180

@@ -1,0 +1,6 @@
+window=01a16956-dcce-76e5-8871-9d9241d4cb17:01a16956-dcce-7a12-8cae-ef028a074180
+worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-live.MwYXBj/proj/.treehouse/proj-735b77/1/proj
+backend=rex
+rex_server=unix:///tmp/fm-rex-lab-501/fm-rexlab-uxb-pr2-live-581555867/s.sock
+rex_session_id=session:01a16956-dcce-76e5-8871-9d9241d4cb17
+rex_block_id=block:01a16956-dcce-7a12-8cae-ef028a074180
