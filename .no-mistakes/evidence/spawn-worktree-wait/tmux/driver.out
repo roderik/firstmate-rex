@@ -1,0 +1,12 @@
+case=blank value=[] exit=1 elapsed=67s meta_published=no
+  error: treehouse get did not enter an isolated worktree within 60s (raise FM_SPAWN_WORKTREE_WAIT_SECS to wait longer; last seen '/private/tmp/claude-501/uxb-pr1-live/proj': it is the spawning project itself; spawning project '/private/tmp/claude-501/uxb-pr1-live/proj'); inspect window fm:fm-live-wait-blank
+case=default value=[-unset-] exit=1 elapsed=66s meta_published=no
+  error: treehouse get did not enter an isolated worktree within 60s (raise FM_SPAWN_WORKTREE_WAIT_SECS to wait longer; last seen '/private/tmp/claude-501/uxb-pr1-live/proj': it is the spawning project itself; spawning project '/private/tmp/claude-501/uxb-pr1-live/proj'); inspect window fm:fm-live-wait-default
+case=non-numeric value=[soon] exit=1 elapsed=67s meta_published=no
+  error: treehouse get did not enter an isolated worktree within 60s (raise FM_SPAWN_WORKTREE_WAIT_SECS to wait longer; last seen '/private/tmp/claude-501/uxb-pr1-live/proj': it is the spawning project itself; spawning project '/private/tmp/claude-501/uxb-pr1-live/proj'); inspect window fm:fm-live-wait-non-numeric
+case=override-3 value=[3] exit=1 elapsed=5s meta_published=no
+  error: treehouse get did not enter an isolated worktree within 3s (raise FM_SPAWN_WORKTREE_WAIT_SECS to wait longer; last seen '/private/tmp/claude-501/uxb-pr1-live/proj': it is the spawning project itself; spawning project '/private/tmp/claude-501/uxb-pr1-live/proj'); inspect window fm:fm-live-wait-override-3
+case=zero-padded value=[00] exit=1 elapsed=66s meta_published=no
+  error: treehouse get did not enter an isolated worktree within 60s (raise FM_SPAWN_WORKTREE_WAIT_SECS to wait longer; last seen '/private/tmp/claude-501/uxb-pr1-live/proj': it is the spawning project itself; spawning project '/private/tmp/claude-501/uxb-pr1-live/proj'); inspect window fm:fm-live-wait-zero-padded
+case=zero value=[0] exit=1 elapsed=66s meta_published=no
+  error: treehouse get did not enter an isolated worktree within 60s (raise FM_SPAWN_WORKTREE_WAIT_SECS to wait longer; last seen '/private/tmp/claude-501/uxb-pr1-live/proj': it is the spawning project itself; spawning project '/private/tmp/claude-501/uxb-pr1-live/proj'); inspect window fm:fm-live-wait-zero

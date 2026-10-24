@@ -1,0 +1,4 @@
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.SGBwzx
+warning: /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.SGBwzx/data/live-wait-override-3/launch-brief.md records no ship branch; defaulting to legacy branch fm/live-wait-override-3
+warning: /private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/fm-lab.SGBwzx/data/live-wait-override-3/launch-brief.md records no delivery contract line (scaffolded before ship briefs recorded one); launching on the explicit --mode no-mistakes - confirm its definition of done matches
+error: treehouse get did not enter an isolated worktree within 3s (raise FM_SPAWN_WORKTREE_WAIT_SECS to wait longer; last seen '/private/tmp/claude-501/uxb-pr1-live/proj': it is the spawning project itself; spawning project '/private/tmp/claude-501/uxb-pr1-live/proj'); inspect window fm:fm-live-wait-override-3
