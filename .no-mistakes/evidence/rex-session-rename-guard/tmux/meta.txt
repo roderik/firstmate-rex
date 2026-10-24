@@ -1,2 +1,2 @@
 window=firstmate:fm-live-tmux-control
-worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.H39TYb/proj/.treehouse/proj-23d62a/1/proj
+worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.dHviXQ/proj/.treehouse/proj-c36e09/1/proj

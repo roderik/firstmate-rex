@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -u
-ours='/Users/roderik/.no-mistakes/evidence/01M5MR5G72GTWS35NBHSAT1X9H/rex/home/state/live-rex-rename.git-hooks'
+ours='/Users/roderik/.no-mistakes/evidence/01M5P6FSBZEHDYKTMM4PS6JGHJ/rex/home/state/live-rex-rename.git-hooks'
 case ${GIT_CONFIG_COUNT:-} in
 '' | *[!0-9]*) ;;
 *)

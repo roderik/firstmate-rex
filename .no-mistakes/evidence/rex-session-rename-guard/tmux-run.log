@@ -1,0 +1,11 @@
+date: 2026-10-24T05:36:24Z
+code: 26d3fbf Merge remote-tracking branch 'origin/main' into rex-session-rename-guard
+tmux: tmux 3.8 private socket /var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T//uxb-pr2-tmux.dHviXQ/tmux.sock
+
+spawned live-tmux-control harness=sleep kind=scout window=firstmate:fm-live-tmux-control worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.dHviXQ/proj/.treehouse/proj-c36e09/1/proj
+spawn_exit=0
+
+window=firstmate:fm-live-tmux-control
+worktree=/private/var/folders/l6/xl8zl0vj573_cc8gkz_fw2qm0000gn/T/uxb-pr2-tmux.dHviXQ/proj/.treehouse/proj-c36e09/1/proj
+
+guard lines in tmux role: 0
